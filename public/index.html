@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#009345">
+<title>Apontamento de serviços</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" href="icons/icon-192.png">
+<style>
+:root{--g:#009345;--t:#004D4C;--bg:#F2F6F4;--ln:#CFDAD5;--tx:#13302E;--er:#B3261E}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:17px/1.35 Roboto,system-ui,sans-serif;padding-bottom:96px}
+header{background:var(--t);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:8px;position:sticky;top:0;z-index:5}
+header b{font-size:20px}header button{background:none;border:1px solid #fff8;color:#fff;border-radius:8px;padding:8px 12px;font-size:15px;white-space:nowrap}
+main{padding:14px;max-width:560px;margin:auto}
+button{font:inherit;cursor:pointer}button:disabled{opacity:.45}
+.b{display:block;width:100%;min-height:60px;border:0;border-radius:12px;background:var(--g);color:#fff;font-size:19px;font-weight:700;margin:10px 0}
+.b.o{background:#fff;color:var(--t);border:2px solid var(--t)}
+.b.p{min-height:76px;font-size:24px}
+h2{font-size:18px;margin:20px 0 8px;color:var(--t)}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+input[type=date],input[type=month],input[type=time],input[type=search],input[type=text]{width:100%;min-height:54px;font-size:20px;border:2px solid var(--ln);border-radius:10px;padding:0 10px;background:#fff;color:var(--tx)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.f label{display:block;font-weight:700;margin-bottom:4px}
+.s{margin-top:6px;width:100%;min-height:44px;border:2px solid var(--g);background:#fff;color:var(--g);border-radius:10px;font-weight:700}
+.chips{display:flex;gap:8px;margin:8px 0}.chip{flex:1;min-height:50px;border:2px solid var(--ln);background:#fff;border-radius:10px;font-weight:700;color:var(--tx)}
+.chip.on{background:var(--g);border-color:var(--g);color:#fff}
+.card{background:#fff;border:2px solid var(--ln);border-radius:12px;padding:12px;margin:10px 0}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:19px}
+.x{border:0;background:none;font-size:24px;color:var(--er);min-width:44px;min-height:44px}
+.sub{color:#4b6663;font-size:15px}.alo{font-weight:700;color:var(--g)}
+.sum{background:var(--t);color:#fff;border-radius:12px;padding:14px;margin:16px 0}.sum big{display:block;font-size:24px;font-weight:700}
+.w{background:#FFF4E0;border-left:6px solid #E08A00;padding:10px;border-radius:6px;margin:8px 0;font-size:15px}
+.e{background:#FDECEA;border-left-color:var(--er)}
+.osd{font-size:30px;text-align:center;background:#fff;border:2px solid var(--ln);border-radius:12px;padding:14px;margin:10px 0}.osd b{letter-spacing:4px;color:var(--g)}
+.kp{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.kp button{min-height:72px;font-size:28px;border:2px solid var(--ln);background:#fff;border-radius:12px;color:var(--tx)}
+.kp .g{background:var(--g);border-color:var(--g);color:#fff;font-size:22px;font-weight:700}
+.ok{text-align:center;font-weight:700;color:var(--g);font-size:19px;margin:10px 0}
+details{margin-top:24px}summary{font-weight:700;color:var(--t);padding:10px 0}
+#inst{position:fixed;bottom:0;left:0;right:0;padding:10px 14px;background:#fff;border-top:2px solid var(--ln);display:none;z-index:9;box-shadow:0 -2px 10px #0001}
+#inst button{width:100%;min-height:52px;border:0;border-radius:10px;background:var(--t);color:#fff;font-size:17px;font-weight:700}
+.sync{text-align:center;font-size:14px;color:#4b6663;margin:6px 0}
+#inst small{display:block;text-align:center;color:#4b6663;margin-top:6px}
+.hfun{font-size:15px!important;line-height:1.2;padding-right:6px}
+#toast{position:fixed;left:50%;bottom:112px;transform:translate(-50%,16px);max-width:92%;background:var(--tx);color:#fff;border-radius:10px;padding:12px 16px;font-size:16px;box-shadow:0 4px 16px #0003;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;z-index:20;display:flex;align-items:center;justify-content:center;gap:8px;text-align:center}
+#toast.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+#toast button{background:none;border:1px solid #fff8;color:#fff;border-radius:8px;padding:6px 12px;font-weight:700;white-space:nowrap}
+</style></head><body>
+<div id="app"></div>
+<div id="toast"></div>
+<div id="inst"><button onclick="instalar()">📱 Instalar aplicativo</button><small>Cria um ícone na tela inicial e funciona offline.</small></div>
+<script>
+/* ===== CONFIGURAÇÃO (editar aqui) ===== */
+const FUNCOES=["Auxiliar de Manutenção","Oficial de Manutenção"];
+const FERIADOS=["2026-01-01","2026-04-03","2026-04-21","2026-05-01","2026-06-04","2026-07-27","2026-09-07","2026-10-12","2026-11-02","2026-11-15","2026-11-20","2026-12-25"];
+const JORNADA=528; /* 8h48 por dia útil */
+const PESOS=[["Rápido",1],["Normal",2],["Demorado",3]];
+/* ===== FIM DA CONFIGURAÇÃO ===== */
+
+const $=s=>document.querySelector(s),p2=n=>String(n).padStart(2,"0");
+const hoje=()=>{const d=new Date();return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())};
+const mins=t=>t?(+t.slice(0,2))*60+(+t.slice(3,5)):null;
+const hm=m=>Math.floor(m/60)+"h"+p2(Math.round(m%60));
+const DS=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+const esc=t=>String(t).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
+
+/* Identificador do aparelho (UUID) com fallback para navegadores antigos */
+function uuid(){
+ try{if(window.crypto&&typeof crypto.randomUUID==="function")return crypto.randomUUID()}catch(e){}
+ const b=[];for(let i=0;i<16;i++)b.push(Math.floor(Math.random()*256));
+ b[6]=(b[6]&15)|64;b[8]=(b[8]&63)|128;
+ const h=b.map(x=>x.toString(16).padStart(2,"0")).join("");
+ return h.slice(0,8)+"-"+h.slice(8,12)+"-"+h.slice(12,16)+"-"+h.slice(16,20)+"-"+h.slice(20);
+}
+
+let S={};try{S=JSON.parse(localStorage.getItem("apt")||"{}")}catch(e){}
+S.dias=S.dias||{};
+let pend={};try{pend=JSON.parse(localStorage.getItem("apt_pend")||"{}")}catch(e){}
+let dispositivo="";try{dispositivo=localStorage.getItem("apt_dev")||""}catch(e){}
+
+/* ===== MIGRAÇÃO ÚNICA: nome antigo -> identidade do aparelho ===== */
+try{
+ if(!dispositivo){
+  dispositivo=uuid();
+  const nomeAntigo=localStorage.getItem("apt_p");
+  if(nomeAntigo&&!localStorage.getItem("apt_mig")){
+   const novo={};
+   Object.keys(S.dias).forEach(k=>{
+    const i=k.indexOf("|");
+    if(i<0){novo[k]=S.dias[k];return}
+    const dt=k.slice(i+1),alvo=dispositivo+"|"+dt;
+    /* Se já existir dado para a data, mantém o registro mais completo */
+    const atual=novo[alvo],novoDia=S.dias[k];
+    novo[alvo]=(atual&&(atual.sv||[]).length>=(novoDia.sv||[]).length)?atual:novoDia;
+   });
+   S.dias=novo;
+   const np={};
+   Object.keys(pend).forEach(k=>{const i=k.indexOf("|");np[i<0?k:dispositivo+"|"+k.slice(i+1)]=1});
+   pend=np;
+   localStorage.setItem("apt_mig","1");
+   localStorage.setItem("apt",JSON.stringify(S));
+   localStorage.setItem("apt_pend",JSON.stringify(pend));
+  }
+  localStorage.setItem("apt_dev",dispositivo);
+ }
+}catch(e){}
+if(!dispositivo)dispositivo=uuid();
+
+let funcaoAtual="";try{const f=localStorage.getItem("apt_f")||"";if(FUNCOES.indexOf(f)>=0)funcaoAtual=f}catch(e){}
+let rec=[];try{const r=JSON.parse(localStorage.getItem("apt_recent")||"[]");if(Array.isArray(r))rec=r.filter(x=>x&&x.os)}catch(e){}
+
+let data=hoje(),tela=funcaoAtual?"dia":"funcao",w={os:""},telaAtual=null,mesSel=data.slice(0,7);
+const funcao=()=>funcaoAtual;
+const key=()=>dispositivo+"|"+data;
+const dia=()=>S.dias[key()]||(S.dias[key()]={sit:"T",e:"",as:"",av:"",s:"",sv:[],ok:false});
+const temDados=d=>!!(d&&(d.e||d.s||d.as||d.av||(d.sv&&d.sv.length)||d.ok||d.sit!=="T"));
+const especial=dt=>{const d=new Date(dt+"T12:00").getDay();return d==0||d==6||FERIADOS.includes(dt)};
+const guardaPend=()=>{try{localStorage.setItem("apt_pend",JSON.stringify(pend))}catch(e){}};
+
+/* ===== Avisos (toast) ===== */
+let toastTimer=null;
+function toast(msg,undo,ms){
+ const el=$("#toast");if(!el)return;
+ el.innerHTML="<span>"+esc(msg)+"</span>"+(undo?'<button onclick="desfazerRm()">Desfazer</button>':"");
+ el.classList.add("on");
+ clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>el.classList.remove("on"),ms||6000);
+}
+
+const save=(silent)=>{
+ try{localStorage.setItem("apt",JSON.stringify(S))}catch(e){}
+ if(dispositivo){pend[key()]=1;guardaPend();enviar()}
+ if(!silent)toast("✔ Salvo",false,2000);
+};
+
+/* ===== Serviços recentes (para repetir em 1 toque) ===== */
+function guardaRec(){try{localStorage.setItem("apt_recent",JSON.stringify(rec))}catch(e){}}
+function addRec(x){rec=[x].concat(rec.filter(r=>r.os!==x.os)).slice(0,8);guardaRec()}
+function repetir(os){
+ const r=rec.find(x=>x.os===os);if(!r)return;
+ const item={os:r.os,osc:data.slice(0,4)+"0"+r.os,peso:r.peso||2};
+ dia().sv.push(item);addRec(item);save();R();
+}
+
+function calc(d,dt){
+ const z={n:0,h50:0,h100:0,tot:0};if(d.sit!=="T")return z;
+ const e=mins(d.e),s=mins(d.s);if(e==null||s==null||s<=e)return z;
+ let t=s-e;const a=mins(d.as),v=mins(d.av);if(a!=null&&v!=null&&v>a)t-=v-a;
+ return especial(dt)?{n:0,h50:0,h100:t,tot:t}:{n:Math.min(t,JORNADA),h50:Math.max(0,t-JORNADA),h100:0,tot:t};
+}
+/* Distribui as horas do dia entre os serviços, proporcionalmente ao peso */
+function aloc(d,c){
+ const L=d.sv,W=L.reduce((a,x)=>a+x.peso,0),out=L.map(()=>({n:0,h50:0,h100:0}));
+ if(!W)return out;
+ ["n","h50","h100"].forEach(k=>{let cum=0,prev=0;L.forEach((x,i)=>{cum+=x.peso;const r=Math.round(c[k]*cum/W);out[i][k]=r-prev;prev=r})});
+ return out;
+}
+function erros(d,c){
+ const er=[],wa=[];
+ if(d.sit==="T"){
+  if(!d.e||!d.s)er.push("Informe a entrada e a saída.");
+  else if(mins(d.s)<=mins(d.e))er.push("A saída está antes da entrada.");
+  if((d.as&&!d.av)||(!d.as&&d.av))er.push("Informe a saída e a volta do almoço.");
+  if(!d.sv.length)er.push("Adicione pelo menos um serviço.");
+  const oss=d.sv.filter(x=>x.os).map(x=>x.os),dup=oss.filter((o,i)=>oss.indexOf(o)!=i);
+  if(dup.length)wa.push("OS repetida no dia: "+[...new Set(dup)].join(", ")+". Confira se não é engano.");
+  if(c.tot>16*60)wa.push("Jornada acima de 16 horas. Confira os horários.");
+ }
+ return{er,wa};
+}
+function R(topo){
+ const mudou=tela!==telaAtual;
+ $("#app").innerHTML=tela==="funcao"?vF():tela==="mes"?vM():tela==="os"?vOS():vD();
+ if(topo||mudou)window.scrollTo(0,0);
+ telaAtual=tela;
+}
+
+/* ===== Tela: escolha da função ===== */
+function vF(){
+ return `<header><b>Apontamento de serviços</b></header><main>
+ <p class="sub">Escolha sua função. Os apontamentos ficam salvos somente neste aparelho.</p>
+ ${FUNCOES.map((f,i)=>`<button class="b p" onclick="setFuncao(FUNCOES[${i}])">${esc(f)}${funcaoAtual===f?" ✔":""}</button>`).join("")}
+ <p class="sub">Trocar de função não apaga os apontamentos já feitos.</p></main>`;
+}
+function setFuncao(f){funcaoAtual=f;try{localStorage.setItem("apt_f",f)}catch(e){}tela="dia";R(true)}
+function trocarFuncao(){tela="funcao";R(true)}
+
+/* ===== Tela: dia ===== */
+function vD(){
+ const d=dia(),c=calc(d,data),A=aloc(d,c),dt=new Date(data+"T12:00"),esp=especial(data),dis=d.ok?"disabled":"",V=erros(d,c);
+ const campo=(k,l)=>`<div class="f"><label>${l}</label><input type="time" ${dis} value="${d[k]}" onchange="setT('${k}',this.value)"><button class="s" ${dis} onclick="agora('${k}')">Agora</button></div>`;
+ const sits=[["T","Trabalhei"],["A","Atestado"],["F","Folga/Falta"]];
+ const recBtns=rec.filter(r=>!d.sv.some(x=>x.os===r.os)).slice(0,8).map(r=>`<button class="s" ${dis} onclick="repetir('${esc(r.os)}')">Repetir: OS ${esc(r.os)}</button>`).join("");
+ return `<header><b class="hfun">${esc(funcaoAtual)}</b><div style="display:flex;gap:8px"><button onclick="abrirMes()">📅 Mês</button><button onclick="trocarFuncao()">Trocar</button></div></header><main>
+ <div class="row"><button class="s" onclick="mv(-1)">‹ Dia anterior</button><button class="s" onclick="mv(1)">Próximo dia ›</button></div>
+ <input type="date" value="${data}" onchange="setD(this.value)" style="margin-top:8px">
+ <p class="sub"><b>${DS[dt.getDay()]}, ${data.split("-").reverse().join("/")}</b>${esp?" · fim de semana ou feriado: horas contam como HE 100%":""}</p>
+ <div class="chips">${sits.map(([k,l])=>`<button class="chip ${d.sit==k?"on":""}" ${dis} onclick="setS('${k}')">${l}</button>`).join("")}</div>
+ ${d.sit==="T"?`<h2>Horários</h2><div class="grid">${campo("e","Entrada")}${campo("s","Saída")}${campo("as","Saiu para o almoço")}${campo("av","Voltou do almoço")}</div>
+ <button class="s" ${dis} onclick="copiarOntem()">⧉ Copiar horários de ontem</button>
+ <h2>Serviços do dia</h2>
+ <p class="sub">As horas do dia são divididas entre os serviços pelo peso: Rápido 1, Normal 2, Demorado 3 (o Demorado recebe 1,5× o Normal).</p>
+ ${d.sv.map((x,i)=>`<div class="card"><div class="top"><b>OS ${esc(x.os)}</b><button class="x" ${dis} onclick="rm(${i})">✕</button></div>
+ <div class="chips">${PESOS.map(([l,v])=>`<button class="chip ${x.peso==v?"on":""}" ${dis} onclick="setP(${i},${v})">${l}</button>`).join("")}</div>
+ <div class="alo">Tempo estimado: ${hm(A[i].n+A[i].h50+A[i].h100)}</div></div>`).join("")}
+ ${recBtns?`<div class="grid" style="margin-top:4px">${recBtns}</div>`:""}
+ <button class="b o" ${dis} onclick="addSv()">+ Adicionar serviço</button>`:""}
+ <div class="sum"><big>Hoje: ${d.sv.length} serviço${d.sv.length==1?"":"s"}, ${hm(c.tot)}</big>Normais ${hm(c.n)} · HE 50% ${hm(c.h50)} · HE 100% ${hm(c.h100)}</div>
+ ${V.er.map(t=>`<div class="w e">${t}</div>`).join("")}${V.wa.map(t=>`<div class="w">${t}</div>`).join("")}
+ ${d.ok?`<div class="ok">✔ Dia confirmado</div><button class="b o" onclick="reabrir()">Reabrir dia</button>`:`<button class="b p" ${d.sit==="T"&&V.er.length?"disabled":""} onclick="conf()">Confirmar o dia</button>`}
+ <div class="sync" id="sync">${txtSync()}</div>
+ <details><summary>Enviar o mês</summary><input type="month" id="mes" value="${data.slice(0,7)}">
+ <button class="b" onclick="exportar('csv')">Enviar planilha (CSV)</button><button class="b o" onclick="exportar('json')">Enviar arquivo JSON</button>
+ <p class="sub">Abre o compartilhamento do celular (WhatsApp, e-mail). Se não abrir, o arquivo é baixado.</p></details></main>`;
+}
+const setD=v=>{if(v){data=v;R(true)}};
+function mv(n){const d=new Date(data+"T12:00");d.setDate(d.getDate()+n);data=d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());R(true)}
+function setT(k,v){dia()[k]=v;save();R()}
+function agora(k){const n=new Date();setT(k,p2(n.getHours())+":"+p2(n.getMinutes()))}
+function setS(k){dia().sit=k;save();R()}
+function setP(i,v){dia().sv[i].peso=v;save();R()}
+
+/* Copia entrada/saída/almoço do dia anterior neste aparelho, só o que estiver vazio */
+function copiarOntem(){
+ const d=dia(),x=new Date(data+"T12:00");x.setDate(x.getDate()-1);
+ const ontem=x.getFullYear()+"-"+p2(x.getMonth()+1)+"-"+p2(x.getDate());
+ const p=S.dias[dispositivo+"|"+ontem];
+ if(!temDados(p)){toast("Não há registro do dia anterior",false,2500);return}
+ let n=0;["e","s","as","av"].forEach(k=>{if(!d[k]&&p[k]){d[k]=p[k];n++}});
+ if(!n){toast("Os horários já estão preenchidos",false,2500);return}
+ save();R();toast("Horários copiados de ontem",false,2500);
+}
+
+/* Remover serviço com opção de desfazer (sem confirm) */
+let ultimaRemocao=null;
+function rm(i){
+ const d=dia();if(!d.sv[i])return;
+ const item=d.sv[i];
+ d.sv.splice(i,1);
+ ultimaRemocao={chave:key(),i:i,item:item};
+ save(true);R();
+ toast("Serviço removido — Desfazer",true,6000);
+}
+function desfazerRm(){
+ const u=ultimaRemocao;
+ if(!u)return;
+ if(u.chave!==key()){ultimaRemocao=null;toast("Não é possível desfazer depois de mudar de dia",false,2500);return}
+ const d=dia();
+ d.sv.splice(Math.min(u.i,d.sv.length),0,u.item);
+ ultimaRemocao=null;
+ save(true);R();toast("Serviço restaurado",false,2000);
+}
+
+function conf(){dia().ok=true;save();R()}
+function reabrir(){dia().ok=false;save();R()}
+
+/* ===== Tela: teclado da OS ===== */
+function addSv(){w={os:""};tela="os";R(true)}
+function vOS(){
+ const ano=data.slice(0,4);
+ return `<header><b>Número da OS</b><button onclick="voltarDia()">Voltar</button></header><main>
+ <div class="osd">OS ${ano}0<b>${(w.os+"____").slice(0,4)}</b></div>
+ <p class="sub">Digite os 4 últimos números da OS.</p>
+ <div class="kp">${[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="dg(${n})">${n}</button>`).join("")}<button onclick="dg('b')">⌫</button><button onclick="dg(0)">0</button><button class="g" ${w.os.length<4?"disabled":""} onclick="okOS()">OK</button></div></main>`;
+}
+function dg(n){w.os=n==="b"?w.os.slice(0,-1):(w.os.length<4?w.os+n:w.os);R()}
+function okOS(){
+ const item={os:w.os,osc:data.slice(0,4)+"0"+w.os,peso:2};
+ dia().sv.push(item);addRec(item);save();tela="dia";R(true);
+}
+function voltarDia(){tela="dia";R(true)}
+
+/* ===== Tela: resumo do mês (somente dados deste aparelho) ===== */
+function abrirMes(){mesSel=data.slice(0,7);tela="mes";R(true)}
+function setMes(v){if(v){mesSel=v;R(true)}}
+function abrirDia(dt){if(!dt)return;data=dt;tela="dia";R(true)}
+function vM(){
+ const m=mesSel,mm=m.slice(5,7),ano=+m.slice(0,4),ultimo=new Date(ano,+mm,0).getDate();
+ const tot={n:0,h50:0,h100:0,tot:0};
+ const chaves=Object.keys(S.dias).filter(k=>k.startsWith(dispositivo+"|"+m)&&temDados(S.dias[k])).sort();
+ chaves.forEach(k=>{const dt=k.slice(k.indexOf("|")+1),c=calc(S.dias[k],dt);tot.n+=c.n;tot.h50+=c.h50;tot.h100+=c.h100;tot.tot+=c.tot});
+ const lista=chaves.map(k=>{
+  const dt=k.slice(k.indexOf("|")+1),d=S.dias[k],c=calc(d,dt);
+  const st=d.sit==="T"?"Trabalhado":d.sit==="A"?"Atestado":"Folga/Falta";
+  const det=d.sit==="T"?hm(c.tot)+" · N "+hm(c.n)+" · HE50 "+hm(c.h50)+" · HE100 "+hm(c.h100):st;
+  return `<div class="card" onclick="abrirDia('${dt}')" style="cursor:pointer"><div class="top"><b>${p2(dt.slice(8,10))}/${mm} · ${DS[new Date(dt+"T12:00").getDay()].slice(0,3)}</b><span class="alo">${d.ok?"✔ confirmado":""}</span></div><div class="sub">${det}</div></div>`;
+ }).join("");
+ const falt=[];
+ for(let dia=1;dia<=ultimo;dia++){
+  const dt=m+"-"+p2(dia);
+  if(dt>hoje())break;
+  if(especial(dt))continue;
+  if(temDados(S.dias[dispositivo+"|"+dt]))continue;
+  falt.push(`<div class="card"><div class="top"><b>${p2(dia)}/${mm} · ${DS[new Date(dt+"T12:00").getDay()].slice(0,3)}</b><button class="s" style="width:auto;margin:0;padding:0 16px" onclick="abrirDia('${dt}')">Preencher</button></div><div class="sub">Sem registro</div></div>`);
+ }
+ return `<header><b>Resumo do mês</b><button onclick="voltarDia()">Voltar</button></header><main>
+ <input type="month" id="mesSel" value="${m}" onchange="setMes(this.value)">
+ <div class="sum"><big>${chaves.length} dia${chaves.length==1?"":"s"} registrado${chaves.length==1?"":"s"} · ${hm(tot.tot)}</big>Normais ${hm(tot.n)} · HE 50% ${hm(tot.h50)} · HE 100% ${hm(tot.h100)}</div>
+ <h2>Dias do mês</h2>
+ ${lista||'<p class="sub">Nenhum dia registrado neste mês.</p>'}
+ <h2>Dias úteis sem registro</h2>
+ ${falt.length?falt.join(""):'<p class="sub">Nenhum dia útil em aberto até hoje. 👍</p>'}
+ <p class="sub">Este resumo usa somente os dados salvos neste aparelho.</p>
+ <div class="sync">${txtSync()}</div></main>`;
+}
+
+/* ===== Envio automático para o servidor (guarda na fila se estiver sem internet) ===== */
+/* Na primeira vez, envia também os dias lançados antes desta versão */
+try{if(!localStorage.getItem("apt_sync")){Object.keys(S.dias).forEach(k=>pend[k]=1);guardaPend();localStorage.setItem("apt_sync","1")}}catch(e){}
+const txtSync=()=>{const n=Object.keys(pend).length;return n?"⏳ "+n+" dia"+(n==1?"":"s")+" aguardando envio ao servidor":"☁️ Dados salvos no servidor"};
+let enviando=false,tEnv=null;
+function enviar(){clearTimeout(tEnv);tEnv=setTimeout(enviarJa,1500)}
+async function enviarJa(){
+ const ks=Object.keys(pend).filter(k=>S.dias[k]);
+ Object.keys(pend).forEach(k=>{if(!S.dias[k])delete pend[k]});
+ if(enviando||!ks.length||!/^https?:$/.test(location.protocol)){guardaPend();return}
+ enviando=true;
+ const lote=ks.slice(0,200).map(k=>({dispositivo:dispositivo,funcao:funcao(),data:k.slice(k.indexOf("|")+1),dia:S.dias[k]}));
+ const snap=lote.map(x=>JSON.stringify(x.dia));
+ const url="/api/apontamentos",opts={method:"POST",headers:{"Content-Type":"application/json"}};
+ let okAll=false;
+ try{
+  const r=await fetch(url,{...opts,body:JSON.stringify(lote)});
+  if(r.ok)okAll=true;
+  else{
+   /* Fallback: se o servidor espera um único objeto por requisição, envia um por vez */
+   okAll=true;
+   for(const x of lote){
+    const rr=await fetch(url,{...opts,body:JSON.stringify(x)});
+    if(!rr.ok){okAll=false;break}
+   }
+  }
+ }catch(e){}
+ if(okAll)lote.forEach((x,i)=>{const k=dispositivo+"|"+x.data;if(JSON.stringify(S.dias[k])===snap[i])delete pend[k]});
+ enviando=false;guardaPend();
+ const el=$("#sync");if(el)el.textContent=txtSync();
+ if(Object.keys(pend).length&&navigator.onLine)tEnv=setTimeout(enviarJa,ks.length>200?1000:60000);
+}
+addEventListener("online",enviar);
+
+/* ===== Exportação ===== */
+const situacao=d=>d.sit=="T"?"Trabalhado":d.sit=="A"?"Atestado":"Folga/Falta";
+function linhas(m){
+ const L=[];
+ Object.keys(S.dias).filter(k=>k.startsWith(dispositivo+"|"+m)).sort().forEach(k=>{
+  const dt=k.slice(k.indexOf("|")+1),d=S.dias[k],c=calc(d,dt),A=aloc(d,c),b=[dt,funcao(),funcao(),situacao(d),d.e,d.as,d.av,d.s],ok=d.ok?"Sim":"Não";
+  if(!d.sv.length)L.push([...b,"","","",c.n,c.h50,c.h100,ok]);
+  d.sv.forEach((x,i)=>L.push([...b,x.os||"",x.osc||"",x.peso,A[i].n,A[i].h50,A[i].h100,ok]));
+ });
+ return L;
+}
+const CAB=["data","prestador","funcao","situacao","entrada","alm_saida","alm_volta","saida","os","os_completa","peso","min_normais","min_he50","min_he100","confirmado"];
+const slug=t=>String(t).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_+|_+$/g,"").toLowerCase();
+async function exportar(fmt){
+ const m=$("#mes").value,L=linhas(m);
+ if(!L.length){alert("Nenhum registro neste mês.");return}
+ const txt=fmt=="csv"?"\ufeff"+[CAB,...L].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(";")).join("\r\n"):JSON.stringify(L.map(r=>Object.fromEntries(CAB.map((k,i)=>[k,r[i]]))),null,1);
+ const nome="apontamento_"+slug(funcao())+"_"+dispositivo.slice(0,8)+"_"+m+"."+fmt,tipo=fmt=="csv"?"text/csv":"application/json",blob=new Blob([txt],{type:tipo});
+ try{const f=new File([blob],nome,{type:tipo});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:nome});return}}catch(e){if(e.name==="AbortError")return}
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();a.remove();
+}
+
+/* ===== PWA: instalação e funcionamento offline ===== */
+let promptInst=null;
+window.addEventListener("beforeinstallprompt",e=>{
+ e.preventDefault();promptInst=e;
+ $("#inst").style.display="block";
+});
+async function instalar(){
+ if(!promptInst)return;
+ promptInst.prompt();
+ try{await promptInst.userChoice}catch(e){}
+ promptInst=null;$("#inst").style.display="none";
+}
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){
+ addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})});
+}
+R();enviar();
+</script></body></html>

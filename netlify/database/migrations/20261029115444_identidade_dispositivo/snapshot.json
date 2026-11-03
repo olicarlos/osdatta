@@ -1,0 +1,146 @@
+{
+  "version": "8",
+  "dialect": "postgres",
+  "id": "e493407c-465a-4819-b779-af4c13fa626c",
+  "prevIds": [
+    "dc811ef7-5417-4ba9-a786-dd10f458ebce"
+  ],
+  "ddl": [
+    {
+      "isRlsEnabled": false,
+      "name": "apontamentos",
+      "entityType": "tables",
+      "schema": "public"
+    },
+    {
+      "type": "serial",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "id",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "apontamentos"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "''",
+      "generated": null,
+      "identity": null,
+      "name": "dispositivo",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "apontamentos"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "pessoa",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "apontamentos"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "''",
+      "generated": null,
+      "identity": null,
+      "name": "funcao",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "apontamentos"
+    },
+    {
+      "type": "text",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "data",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "apontamentos"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "dia",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "apontamentos"
+    },
+    {
+      "type": "timestamp",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "now()",
+      "generated": null,
+      "identity": null,
+      "name": "atualizado_em",
+      "entityType": "columns",
+      "schema": "public",
+      "table": "apontamentos"
+    },
+    {
+      "nameExplicit": true,
+      "columns": [
+        {
+          "value": "dispositivo",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        },
+        {
+          "value": "data",
+          "isExpression": false,
+          "asc": true,
+          "nullsFirst": false,
+          "opclass": null
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "with": "",
+      "method": "btree",
+      "concurrently": false,
+      "name": "apontamentos_dispositivo_data_idx",
+      "entityType": "indexes",
+      "schema": "public",
+      "table": "apontamentos"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "apontamentos_pkey",
+      "schema": "public",
+      "table": "apontamentos",
+      "entityType": "pks"
+    }
+  ],
+  "renames": []
+}

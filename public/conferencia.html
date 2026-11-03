@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#009345">
+<title>Conferência do gestor</title>
+<link rel="icon" href="icons/icon-192.png">
+<style>
+:root{--g:#009345;--t:#004D4C;--bg:#F2F6F4;--ln:#CFDAD5;--tx:#13302E;--er:#B3261E}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:17px/1.35 Roboto,system-ui,sans-serif;padding-bottom:40px}
+header{background:var(--t);color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+header b{font-size:20px}header button{background:none;border:1px solid #fff8;color:#fff;border-radius:8px;padding:8px 12px;font-size:15px}
+main{padding:14px;max-width:560px;margin:auto}
+button{font:inherit;cursor:pointer}button:disabled{opacity:.45}
+.b{display:block;width:100%;min-height:60px;border:0;border-radius:12px;background:var(--g);color:#fff;font-size:19px;font-weight:700;margin:10px 0}
+.b.o{background:#fff;color:var(--t);border:2px solid var(--t)}
+h2{font-size:18px;margin:20px 0 8px;color:var(--t)}
+input[type=month],input[type=password]{width:100%;min-height:54px;font-size:20px;border:2px solid var(--ln);border-radius:10px;padding:0 10px;background:#fff;color:var(--tx)}
+.f label{display:block;font-weight:700;margin-bottom:4px}
+.card{background:#fff;border:2px solid var(--ln);border-radius:12px;padding:12px;margin:10px 0}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:19px;gap:8px}
+.sub{color:#4b6663;font-size:15px;word-break:break-all}
+.sum{background:var(--t);color:#fff;border-radius:12px;padding:14px;margin:16px 0}.sum big{display:block;font-size:24px;font-weight:700}
+.w{background:#FFF4E0;border-left:6px solid #E08A00;padding:10px;border-radius:6px;margin:8px 0;font-size:15px}
+.e{background:#FDECEA;border-left-color:var(--er)}
+.ok{text-align:center;font-weight:700;color:var(--g);font-size:19px;margin:10px 0}
+.kg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.kg>div, .kb>div{background:var(--bg);border:2px solid var(--ln);border-radius:10px;padding:10px;text-align:center;min-width:0}
+.kg b,.kb b{display:block;font-size:22px;color:var(--t);line-height:1.1}
+.kg span,.kb span{font-size:13px;color:#4b6663;display:block;margin-top:3px}
+.kb{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}
+.hrs{background:var(--bg);border:2px solid var(--ln);border-radius:10px;padding:10px;margin:10px 0;font-size:15px;line-height:1.7}
+.hrs b{color:var(--t)}
+.reg{display:flex;justify-content:space-between;gap:8px;padding:7px 0;border-bottom:1px dashed var(--ln);font-size:15px}
+.reg:last-child{border-bottom:0}
+details{margin-top:10px}summary{font-weight:700;color:var(--t);padding:8px 0;cursor:pointer}
+.badge{font-size:13px;font-weight:700;color:var(--g);white-space:nowrap}
+</style></head><body>
+<header><b>Conferência do gestor</b><button id="sair" style="display:none">Sair</button></header>
+<main>
+  <div id="login" style="display:none">
+    <div class="card">
+      <h2 style="margin-top:0">Acesso do gestor</h2>
+      <p class="sub">Digite a senha administrativa (variável ADMIN_KEY do Cloudflare).</p>
+      <div class="f"><label for="senha">Senha</label><input type="password" id="senha" autocomplete="current-password" placeholder="Senha"></div>
+      <button class="b" id="entrar">Entrar</button>
+      <div id="loginMsg"></div>
+    </div>
+  </div>
+
+  <div id="conteudo" style="display:none">
+    <div class="card">
+      <div class="f"><label for="mes">Mês de referência</label><input type="month" id="mes"></div>
+      <p class="sub" style="margin-bottom:0">Somente leitura. Horas calculadas como no app: jornada de 528 min/dia útil; fim de semana ou feriado conta 100% HE; almoço descontado quando saída e volta são válidas.</p>
+    </div>
+    <div id="msg"></div>
+    <div id="totais"></div>
+    <div id="lista"></div>
+  </div>
+
+  <div id="aviso" style="display:none"></div>
+</main>
+
+<script>
+/* ===== Mesma lógica de horas do app (public/index.html) ===== */
+const FERIADOS=["2026-01-01","2026-04-03","2026-04-21","2026-05-01","2026-06-04","2026-07-27","2026-09-07","2026-10-12","2026-11-02","2026-11-15","2026-11-20","2026-12-25"];
+const JORNADA=528; /* 8h48 por dia útil */
+const p2=n=>String(n).padStart(2,"0");
+const hoje=()=>{const d=new Date();return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate())};
+const mins=t=>t?(+t.slice(0,2))*60+(+t.slice(3,5)):null;
+const hm=m=>Math.floor(m/60)+"h"+p2(Math.round(m%60));
+const esc=t=>String(t).replace(/[&<>"']/g,c=>"&#"+c.charCodeAt(0)+";");
+const DS=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
+const especial=dt=>{const d=new Date(dt+"T12:00").getDay();return d==0||d==6||FERIADOS.includes(dt)};
+
+function calc(d,dt){
+ const z={n:0,h50:0,h100:0,tot:0};if(!d||d.sit!=="T")return z;
+ const e=mins(d.e),s=mins(d.s);if(e==null||s==null||s<=e)return z;
+ let t=s-e;const a=mins(d.as),v=mins(d.av);if(a!=null&&v!=null&&v>a)t-=v-a;
+ return especial(dt)?{n:0,h50:0,h100:t,tot:t}:{n:Math.min(t,JORNADA),h50:Math.max(0,t-JORNADA),h100:0,tot:t};
+}
+
+/* ===== Autenticação (senha só no sessionStorage e no header, nunca na URL) ===== */
+const CHAVE="conf_adm_key";
+let senha="";
+try{senha=sessionStorage.getItem(CHAVE)||""}catch(e){}
+const $=s=>document.querySelector(s);
+const login=$("#login"), conteudo=$("#conteudo"), msg=$("#msg"), lista=$("#lista"), totais=$("#totais"), aviso=$("#aviso"), mesEl=$("#mes");
+
+mesEl.value=hoje().slice(0,7);
+$("#sair").onclick=()=>{try{sessionStorage.removeItem(CHAVE)}catch(e){}senha="";conteudo.style.display="none";$("#sair").style.display="none";mostrarLogin("")};
+$("#entrar").onclick=entrar;
+$("#senha").addEventListener("keydown",e=>{if(e.key==="Enter")entrar()});
+mesEl.onchange=carregar;
+
+function mostrarLogin(erro){
+ login.style.display="block";conteudo.style.display="none";$("#sair").style.display="none";
+ $("#loginMsg").innerHTML=erro?`<div class="w e">${esc(erro)}</div>`:"";
+ setTimeout(()=>$("#senha").focus(),50);
+}
+function entrar(){
+ const v=$("#senha").value;
+ if(!v){$("#loginMsg").innerHTML='<div class="w e">Digite a senha.</div>';return}
+ senha=v;
+ try{sessionStorage.setItem(CHAVE,senha)}catch(e){}
+ carregar();
+}
+function erro(t){msg.innerHTML=`<div class="w e">${esc(t)}</div>`}
+function limpar(){msg.innerHTML="";}
+
+async function carregar(){
+ if(!senha){mostrarLogin("");return}
+ const mes=mesEl.value;
+ if(!/^\d{4}-\d{2}$/.test(mes)){erro("Escolha um mês válido.");return}
+ login.style.display="none";conteudo.style.display="block";$("#sair").style.display="block";
+ limpar();lista.innerHTML="";totais.innerHTML="";aviso.style.display="none";
+ try{
+  const r=await fetch("/api/apontamentos?mes="+encodeURIComponent(mes),{headers:{"x-admin-key":senha},cache:"no-store"});
+  if(r.status===401){try{sessionStorage.removeItem(CHAVE)}catch(e){}senha="";mostrarLogin("Senha incorreta");return}
+  if(!r.ok){
+   let detalhe="";
+   try{const t=await r.text();detalhe=t?": "+t.slice(0,300):""}catch(e){}
+   throw new Error("o servidor respondeu "+r.status+detalhe);
+  }
+  const dados=await r.json();
+  if(!Array.isArray(dados))throw new Error("resposta inesperada do servidor");
+  render(dados,mes);
+ }catch(e){
+  erro("Não foi possível carregar a conferência — "+e.message);
+ }
+}
+
+/* ===== Datas úteis ===== */
+function diasUteisAteHoje(mes){
+ const mesAtual=hoje().slice(0,7);
+ if(mes>mesAtual)return [];
+ const [a,m]=mes.split("-").map(Number);
+ const ultimo=new Date(a,m,0).getDate();
+ const fim=mes===mesAtual?hoje():mes+"-"+p2(ultimo);
+ const out=[];
+ for(let d=1;d<=+fim.slice(8,10);d++){
+  const dt=mes+"-"+p2(d);
+  if(!especial(dt))out.push(dt);
+ }
+ return out;
+}
+function situacao(d){
+ if(!d||typeof d!=="object")return "—";
+ return d.sit==="T"?"Trabalhado":d.sit==="A"?"Atestado":d.sit==="F"?"Folga/Falta":"—";
+}
+
+/* ===== Renderização ===== */
+function render(dados,mes){
+ if(!dados.length){
+  lista.innerHTML='<div class="card"><p class="sub" style="margin:0">Nenhum lançamento neste mês.</p></div>';
+  return;
+ }
+ const uteis=diasUteisAteHoje(mes);
+ const grupos=new Map();
+ dados.forEach(r=>{
+  if(!r||typeof r!=="object")return;
+  const dev=String(r.dispositivo||"");
+  if(!grupos.has(dev))grupos.set(dev,[]);
+  grupos.get(dev).push(r);
+ });
+
+ const geral={n:0,h50:0,h100:0,tot:0};
+ let html="";
+ [...grupos.keys()].sort((a,b)=>{
+  const pa=(grupos.get(a)[0]||{}).pessoa||a, pb=(grupos.get(b)[0]||{}).pessoa||b;
+  return String(pa).localeCompare(String(pb),"pt-BR");
+ }).forEach(dev=>{
+  const regs=grupos.get(dev).slice().sort((a,b)=>String(a.data).localeCompare(String(b.data)));
+  const setDias=new Set(regs.map(r=>String(r.data)));
+  let confirmados=0;const t={n:0,h50:0,h100:0,tot:0};
+  const porDia=regs.map(r=>{
+   const d=r.dia&&typeof r.dia==="object"?r.dia:{};
+   const c=calc(d,String(r.data));
+   t.n+=c.n;t.h50+=c.h50;t.h100+=c.h100;t.tot+=c.tot;
+   if(d.ok===true)confirmados++;
+   return {data:String(r.data),d,c,ok:d.ok===true};
+  });
+  geral.n+=t.n;geral.h50+=t.h50;geral.h100+=t.h100;geral.tot+=t.tot;
+
+  const funcao=(regs[0]&&regs[0].funcao)||"—";
+  const pessoa=(regs[0]&&regs[0].pessoa)||"";
+  const nome=pessoa||dev||"Aparelho sem identificação";
+  const faltando=uteis.filter(dt=>!setDias.has(dt)).length;
+
+  html+=`<div class="card">
+   <div class="top"><b>${esc(nome)}</b><span class="badge">${esc(funcao)}</span></div>
+   <div class="sub">Aparelho: ${esc(dev||"—")}${pessoa&&dev?` · nome legado: ${esc(pessoa)}`:""}</div>
+   <div class="kg">
+    <div><b>${regs.length}</b><span>dias lançados</span></div>
+    <div><b>${confirmados}</b><span>dias confirmados</span></div>
+    <div><b>${faltando}</b><span>dias úteis sem lançamento</span></div>
+   </div>
+   <div class="kb">
+    <div><b>${hm(t.n)}</b><span>Normais</span></div>
+    <div><b>${hm(t.h50)}</b><span>HE 50%</span></div>
+    <div><b>${hm(t.h100)}</b><span>HE 100%</span></div>
+    <div><b>${hm(t.tot)}</b><span>Total no mês</span></div>
+   </div>
+   <details><summary>Ver ${regs.length} dia${regs.length===1?"":"s"}</summary>
+    ${porDia.map(x=>{
+      const diaNum=x.data.slice(8,10)+"/"+x.data.slice(5,7);
+      const sem=x.data+"T12:00";
+      const dow=DS[new Date(sem).getDay()];
+      return `<div class="reg"><span>${diaNum} ${dow} · ${situacao(x.d)}${x.ok?" ✔":""}</span><span><b>${hm(x.c.tot)}</b>${x.c.h100?` · HE100 ${hm(x.c.h100)}`:""}${x.c.h50?` · HE50 ${hm(x.c.h50)}`:""}</span></div>`;
+    }).join("")}
+   </details>
+  </div>`;
+ });
+
+ totais.innerHTML=`<div class="sum"><big>${dados.length} lançamento${dados.length===1?"":"s"} · ${grupos.size} prestador${grupos.size===1?"":"es"} · ${hm(geral.tot)}</big>Normais ${hm(geral.n)} · HE 50% ${hm(geral.h50)} · HE 100% ${hm(geral.h100)}</div>`;
+ lista.innerHTML=html;
+ aviso.style.display="none";
+}
+
+/* tenta entrar direto se já houver senha na sessão desta aba */
+if(senha)carregar();else mostrarLogin("");
+</script></body></html>
