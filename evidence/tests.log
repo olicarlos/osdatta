@@ -1,0 +1,53 @@
+npm notice run test
+npm notice run node --test tests/*.test.js
+✔ API real rejeita overlap antes de preparar qualquer gravação (72.0659ms)
+✔ API rejeita null mesmo em Dia O em vez de descartar entrada inválida (1.089ms)
+✔ cancelar e voltar conservam draft sem gravar; reabrir preserva histórico e fila (46.8042ms)
+✔ A/F sem OS e O com horários válidos salvam sem exigir OS (37.4835ms)
+✔ fila legada com OS não é enviada nem reescrita ao abrir (18.97ms)
+✔ fonte compartilhada calcula 588 - 60 - 45 = 483 (15.1027ms)
+✔ Dia O gera intervalos explícitos excluindo almoço e mantém informação (2.0618ms)
+✔ gestor real mostra cada intervalo e totais iguais ao app (42.4105ms)
+✔ aloc real permanece byte a byte como main e preserva soma de cada categoria (268.1369ms)
+✔ categorias reais zero ocio, HE50, HE100 e zero produtivo (0.9035ms)
+✔ ALTER ADD preserva todos os bytes das colunas legadas e default [] (30.9106ms)
+✔ CRUD real: adicionar 2, editar, remover e bloquear período inválido (46.9211ms)
+✔ troca tipo no draft conserva OS, horários e períodos manuais e exporta O (12.5172ms)
+✔ journal completa commit aprovado após crash sem perder snapshot (3.6ms)
+✔ retry real esgota em 8 tentativas, respeita Retry-After e não reseta ao reiniciar (1.6909ms)
+✔ SW real inclui módulos no precache e nunca intercepta API ou POST (5.6324ms)
+✔ mesma validação real app/API: invertido (109.4733ms)
+✔ mesma validação real app/API: fora jornada (14.1672ms)
+✔ mesma validação real app/API: sobrepostos (12.9181ms)
+✔ mesma validação real app/API: almoço (11.9916ms)
+✔ mesma validação real app/API: almoço invertido (14.1776ms)
+✔ mesma validação real app/API: almoço fora jornada (14.13ms)
+✔ mesma validação real app/API: almoço incompleto (11.1556ms)
+✔ mesma validação real app/API: jornada invertida (13.0383ms)
+✔ mesma validação real app/API: HH:mm inválido (10.5839ms)
+✔ mesma validação real app/API: array null (10.6979ms)
+✔ mesma validação real app/API: período null (10.3788ms)
+✔ mesma validação real app/API: demais períodos (8.4193ms)
+✔ mesma validação real app/API: peso inválido (8.2417ms)
+✔ limites adjacentes ao almoço e entre períodos são aceitos (0.9704ms)
+✔ API D1+SQLite reais: duplo envio converge em uma linha; GET retorna array canônico (7.802ms)
+✔ API rejeita OS sem consentimento, alteração após consentimento, conflito de arrays e data irreal (44.5784ms)
+✔ GET legado usa [] sem reescrever JSON legado; acesso administrativo permanece exigido (6.4346ms)
+✔ O sem OS persiste intervalos explícitos; A/F sem OS continuam aceitos (13.9904ms)
+✔ limite 1 MiB e JSON inválido não preparam gravação (11.7669ms)
+✔ offline aprovado → reload → sync usa payload JSON idêntico, nunca draft editado (116.8728ms)
+✔ perda de ack após sucesso permite retry idempotente sem criar outra linha (18.9181ms)
+✔ ack antigo não remove snapshot mais recente aprovado durante envio (6.9536ms)
+✔ erro permanente não faz fallback nem loop; orçamento transitório persiste após reload (52.3171ms)
+✔ app real mantém edições em drafts e lista TODAS OS antes de salvar (29.8443ms)
+✔ CSV/JSON reais incluem tipo O, intervalos e totais diários (11.3123ms)
+✔ draft e revisão não alteram apt/fila; aprovação offline persiste snapshot imutável (34.271ms)
+✔ remover e desfazer invalida revisão aberta mesmo com conteúdo igual (1.593ms)
+ℹ tests 43
+ℹ suites 0
+ℹ pass 43
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1038.7066

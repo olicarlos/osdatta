@@ -48,7 +48,9 @@ details{margin-top:24px}summary{font-weight:700;color:var(--t);padding:10px 0}
 <div id="app"></div>
 <div id="toast"></div>
 <div id="inst"><button onclick="instalar()">📱 Instalar aplicativo</button><small>Cria um ícone na tela inicial e funciona offline.</small></div>
-<script>
+<script type="module">
+import {calcDay,validateDay,canonicalDay,clone,aprovado} from './domain.js';
+import {Workflow} from './workflow.js';
 /* ===== CONFIGURAÇÃO (editar aqui) ===== */
 const FUNCOES=["Auxiliar de Manutenção","Oficial de Manutenção"];
 const FERIADOS=["2026-01-01","2026-04-03","2026-04-21","2026-05-01","2026-06-04","2026-07-27","2026-09-07","2026-10-12","2026-11-02","2026-11-15","2026-11-20","2026-12-25"];
@@ -111,7 +113,13 @@ let rec=[];try{const r=JSON.parse(localStorage.getItem("apt_recent")||"[]");if(A
 let data=hoje(),tela=funcaoAtual?"dia":"funcao",w={os:""},telaAtual=null,mesSel=data.slice(0,7);
 const funcao=()=>funcaoAtual;
 const key=()=>dispositivo+"|"+data;
-const dia=()=>S.dias[key()]||(S.dias[key()]={sit:"T",e:"",as:"",av:"",s:"",sv:[],ok:false});
+const flow=new Workflow(localStorage);
+S=flow.saved;pend=flow.pending;
+const dia=()=>{
+ if(!flow.drafts[key()])flow.drafts[key()]=clone(flow.get(key()));
+ return flow.drafts[key()];
+};
+let revisao=null;
 const temDados=d=>!!(d&&(d.e||d.s||d.as||d.av||(d.sv&&d.sv.length)||d.ok||d.sit!=="T"));
 const especial=dt=>{const d=new Date(dt+"T12:00").getDay();return d==0||d==6||FERIADOS.includes(dt)};
 const guardaPend=()=>{try{localStorage.setItem("apt_pend",JSON.stringify(pend))}catch(e){}};
@@ -127,9 +135,9 @@ function toast(msg,undo,ms){
 }
 
 const save=(silent)=>{
- try{localStorage.setItem("apt",JSON.stringify(S))}catch(e){}
- if(dispositivo){pend[key()]=1;guardaPend();enviar()}
- if(!silent)toast("✔ Salvo",false,2000);
+ revisao=null;
+ try{flow.edit(key(),dia())}catch(e){toast('Não foi possível guardar o rascunho. Libere espaço no aparelho.');return}
+ if(!silent)toast("Rascunho local — confirme para salvar/enviar",false,2000);
 };
 
 /* ===== Serviços recentes (para repetir em 1 toque) ===== */
@@ -142,10 +150,7 @@ function repetir(os){
 }
 
 function calc(d,dt){
- const z={n:0,h50:0,h100:0,tot:0};if(d.sit!=="T")return z;
- const e=mins(d.e),s=mins(d.s);if(e==null||s==null||s<=e)return z;
- let t=s-e;const a=mins(d.as),v=mins(d.av);if(a!=null&&v!=null&&v>a)t-=v-a;
- return especial(dt)?{n:0,h50:0,h100:t,tot:t}:{n:Math.min(t,JORNADA),h50:Math.max(0,t-JORNADA),h100:0,tot:t};
+ return calcDay(canonicalDay(d),dt);
 }
 /* Distribui as horas do dia entre os serviços, proporcionalmente ao peso */
 function aloc(d,c){
@@ -155,12 +160,8 @@ function aloc(d,c){
  return out;
 }
 function erros(d,c){
- const er=[],wa=[];
+ const er=validateDay(canonicalDay(d)),wa=[];
  if(d.sit==="T"){
-  if(!d.e||!d.s)er.push("Informe a entrada e a saída.");
-  else if(mins(d.s)<=mins(d.e))er.push("A saída está antes da entrada.");
-  if((d.as&&!d.av)||(!d.as&&d.av))er.push("Informe a saída e a volta do almoço.");
-  if(!d.sv.length)er.push("Adicione pelo menos um serviço.");
   const oss=d.sv.filter(x=>x.os).map(x=>x.os),dup=oss.filter((o,i)=>oss.indexOf(o)!=i);
   if(dup.length)wa.push("OS repetida no dia: "+[...new Set(dup)].join(", ")+". Confira se não é engano.");
   if(c.tot>16*60)wa.push("Jornada acima de 16 horas. Confira os horários.");
@@ -169,9 +170,10 @@ function erros(d,c){
 }
 function R(topo){
  const mudou=tela!==telaAtual;
- $("#app").innerHTML=tela==="funcao"?vF():tela==="mes"?vM():tela==="os"?vOS():vD();
+ $("#app").innerHTML=tela==="revisao"?vRevisao():tela==="funcao"?vF():tela==="mes"?vM():tela==="os"?vOS():vD();
  if(topo||mudou)window.scrollTo(0,0);
  telaAtual=tela;
+ if(tela==='revisao')$('#tituloRevisao').focus();
 }
 
 /* ===== Tela: escolha da função ===== */
@@ -188,15 +190,20 @@ function trocarFuncao(){tela="funcao";R(true)}
 function vD(){
  const d=dia(),c=calc(d,data),A=aloc(d,c),dt=new Date(data+"T12:00"),esp=especial(data),dis=d.ok?"disabled":"",V=erros(d,c);
  const campo=(k,l)=>`<div class="f"><label>${l}</label><input type="time" ${dis} value="${d[k]}" onchange="setT('${k}',this.value)"><button class="s" ${dis} onclick="agora('${k}')">Agora</button></div>`;
- const sits=[["T","Trabalhei"],["A","Atestado"],["F","Folga/Falta"]];
+ const sits=[["T","Trabalhei"],["O","Dia ocioso"],["A","Atestado"],["F","Folga/Falta"]];
  const recBtns=rec.filter(r=>!d.sv.some(x=>x.os===r.os)).slice(0,8).map(r=>`<button class="s" ${dis} onclick="repetir('${esc(r.os)}')">Repetir: OS ${esc(r.os)}</button>`).join("");
  return `<header><b class="hfun">${esc(funcaoAtual)}</b><div style="display:flex;gap:8px"><button onclick="abrirMes()">📅 Mês</button><button onclick="trocarFuncao()">Trocar</button></div></header><main>
  <div class="row"><button class="s" onclick="mv(-1)">‹ Dia anterior</button><button class="s" onclick="mv(1)">Próximo dia ›</button></div>
  <input type="date" value="${data}" onchange="setD(this.value)" style="margin-top:8px">
  <p class="sub"><b>${DS[dt.getDay()]}, ${data.split("-").reverse().join("/")}</b>${esp?" · fim de semana ou feriado: horas contam como HE 100%":""}</p>
  <div class="chips">${sits.map(([k,l])=>`<button class="chip ${d.sit==k?"on":""}" ${dis} onclick="setS('${k}')">${l}</button>`).join("")}</div>
- ${d.sit==="T"?`<h2>Horários</h2><div class="grid">${campo("e","Entrada")}${campo("s","Saída")}${campo("as","Saiu para o almoço")}${campo("av","Voltou do almoço")}</div>
+ <p class="w" role="status">${d.ok?'Snapshot salvo. Reabrir cria rascunho sem alterar histórico.':'Rascunho local: ainda não salvo nem enviado. Use Salvar dia.'}</p>
+ ${d.sit==="O"?'<p class="sub">Dia ocioso: informe os horários reais. Toda jornada, exceto almoço, será ociosa. OS e horários anteriores são preservados; trocar o tipo é reversível.</p>':''}
+ ${['T','O'].includes(d.sit)?`<h2>Horários</h2><div class="grid">${campo("e","Entrada")}${campo("s","Saída")}${campo("as","Saiu para o almoço")}${campo("av","Voltou do almoço")}</div>
  <button class="s" ${dis} onclick="copiarOntem()">⧉ Copiar horários de ontem</button>
+ <h2>Períodos ociosos</h2>
+ ${(canonicalDay(d).periodos_ociosos||[]).map((p,i)=>`<div class="card"><div class="grid"><label>Início<input aria-label="Início ocioso ${i+1}" type="time" ${dis} ${d.sit==='O'?'disabled':''} value="${esc(p.inicio)}" onchange="setIdle(${i},'inicio',this.value)"></label><label>Fim<input aria-label="Fim ocioso ${i+1}" type="time" ${dis} ${d.sit==='O'?'disabled':''} value="${esc(p.fim)}" onchange="setIdle(${i},'fim',this.value)"></label></div>${d.sit==='T'?`<button class="s" ${dis} onclick="rmIdle(${i})">Remover período ${i+1}</button>`:''}</div>`).join('')}
+ ${d.sit==='T'?`<button class="b o" ${dis} onclick="addIdle()">+ Adicionar período ocioso</button>`:''}
  <h2>Serviços do dia</h2>
  <p class="sub">As horas do dia são divididas entre os serviços pelo peso: Rápido 1, Normal 2, Demorado 3 (o Demorado recebe 1,5× o Normal).</p>
  ${d.sv.map((x,i)=>`<div class="card"><div class="top"><b>OS ${esc(x.os)}</b><button class="x" ${dis} onclick="rm(${i})">✕</button></div>
@@ -204,9 +211,9 @@ function vD(){
  <div class="alo">Tempo estimado: ${hm(A[i].n+A[i].h50+A[i].h100)}</div></div>`).join("")}
  ${recBtns?`<div class="grid" style="margin-top:4px">${recBtns}</div>`:""}
  <button class="b o" ${dis} onclick="addSv()">+ Adicionar serviço</button>`:""}
- <div class="sum"><big>Hoje: ${d.sv.length} serviço${d.sv.length==1?"":"s"}, ${hm(c.tot)}</big>Normais ${hm(c.n)} · HE 50% ${hm(c.h50)} · HE 100% ${hm(c.h100)}</div>
+ <div class="sum"><big>Produtivo: ${hm(c.tot)} · ${d.sv.length} serviços</big>Bruto ${c.bruto} min · almoço ${c.almoco} min · ocioso ${c.ocioso} min · descontado ${c.descontado} min<br>Normais ${hm(c.n)} · HE 50% ${hm(c.h50)} · HE 100% ${hm(c.h100)}</div>
  ${V.er.map(t=>`<div class="w e">${t}</div>`).join("")}${V.wa.map(t=>`<div class="w">${t}</div>`).join("")}
- ${d.ok?`<div class="ok">✔ Dia confirmado</div><button class="b o" onclick="reabrir()">Reabrir dia</button>`:`<button class="b p" ${d.sit==="T"&&V.er.length?"disabled":""} onclick="conf()">Confirmar o dia</button>`}
+ ${d.ok?`<div class="ok">✔ Dia confirmado</div><button class="b o" onclick="reabrir()">Reabrir dia</button>`:`<button class="b p" ${V.er.length?"disabled":""} onclick="conf()">Salvar dia / Confirmar dia</button><button class="b o" onclick="cancelarEdicao()">Descartar rascunho</button>`}
  <div class="sync" id="sync">${txtSync()}</div>
  <details><summary>Enviar o mês</summary><input type="month" id="mes" value="${data.slice(0,7)}">
  <button class="b" onclick="exportar('csv')">Enviar planilha (CSV)</button><button class="b o" onclick="exportar('json')">Enviar arquivo JSON</button>
@@ -216,8 +223,11 @@ const setD=v=>{if(v){data=v;R(true)}};
 function mv(n){const d=new Date(data+"T12:00");d.setDate(d.getDate()+n);data=d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());R(true)}
 function setT(k,v){dia()[k]=v;save();R()}
 function agora(k){const n=new Date();setT(k,p2(n.getHours())+":"+p2(n.getMinutes()))}
-function setS(k){dia().sit=k;save();R()}
+function setS(k){dia().sit=k;save();R();toast('Tipo alterado no rascunho. Horários, OS e períodos manuais preservados; você pode voltar ao tipo anterior.')}
 function setP(i,v){dia().sv[i].peso=v;save();R()}
+function addIdle(){const d=dia();d.periodos_ociosos=d.periodos_ociosos||[];d.periodos_ociosos.push({inicio:'',fim:''});save();R()}
+function setIdle(i,k,v){dia().periodos_ociosos[i][k]=v;save();R()}
+function rmIdle(i){dia().periodos_ociosos.splice(i,1);save();R()}
 
 /* Copia entrada/saída/almoço do dia anterior neste aparelho, só o que estiver vazio */
 function copiarOntem(){
@@ -250,8 +260,22 @@ function desfazerRm(){
  save(true);R();toast("Serviço restaurado",false,2000);
 }
 
-function conf(){dia().ok=true;save();R()}
-function reabrir(){dia().ok=false;save();R()}
+function conf(){
+ try{revisao={key:key(),payload:flow.review(key(),funcao())};tela='revisao';R(true)}catch(e){toast(e.message)}
+}
+function vRevisao(){
+ if(!revisao)return '<main>Revisão expirada. Volte ao dia.</main>';
+ const p=revisao.payload,c=calc(p.dia,p.data);
+ return `<header><b>Revisar dia</b></header><main aria-labelledby="tituloRevisao"><h2 id="tituloRevisao" tabindex="-1">Confira TODAS as OS antes de salvar</h2><p>${esc(p.data)} · ${esc(situacao(p.dia))}</p><ol>${p.dia.sv.map(x=>`<li class="card">OS completa <b>${esc(x.osc)}</b> · sufixo <b>${esc(x.os)}</b> · peso ${x.peso}</li>`).join('')}</ol>${p.dia.sv.length?'':'<p>Dia sem OS.</p>'}<p>Produtivo ${c.tot} min · ocioso ${c.ocioso} min.</p><p>Somente este snapshot será salvo e enviado. Duplicadas também estão listadas.</p><button class="b" onclick="confirmarSalvar()">Confirmar e salvar</button><button class="b o" onclick="voltarCorrigir()">Voltar para corrigir</button><button class="b o" onclick="cancelarRevisao()">Cancelar</button></main>`;
+}
+function confirmarSalvar(){
+ if(!revisao)return;
+ try{flow.approve(revisao.key,revisao.payload);revisao=null;tela='dia';R(true);enviar();toast('Snapshot confirmado e salvo.')}catch(e){toast(e.message)}
+}
+function voltarCorrigir(){revisao=null;tela='dia';R(true)}
+function cancelarRevisao(){revisao=null;tela='dia';R(true);toast('Cancelado. Rascunho conservado; histórico e fila não foram alterados.')}
+function cancelarEdicao(){flow.cancel(key());revisao=null;R();toast('Rascunho descartado. Histórico e fila preservados.')}
+function reabrir(){flow.edit(key(),dia());R();toast('Rascunho aberto. Snapshot salvo e fila preservados até nova confirmação.')}
 
 /* ===== Tela: teclado da OS ===== */
 function addSv(){w={os:""};tela="os";R(true)}
@@ -280,8 +304,8 @@ function vM(){
  chaves.forEach(k=>{const dt=k.slice(k.indexOf("|")+1),c=calc(S.dias[k],dt);tot.n+=c.n;tot.h50+=c.h50;tot.h100+=c.h100;tot.tot+=c.tot});
  const lista=chaves.map(k=>{
   const dt=k.slice(k.indexOf("|")+1),d=S.dias[k],c=calc(d,dt);
-  const st=d.sit==="T"?"Trabalhado":d.sit==="A"?"Atestado":"Folga/Falta";
-  const det=d.sit==="T"?hm(c.tot)+" · N "+hm(c.n)+" · HE50 "+hm(c.h50)+" · HE100 "+hm(c.h100):st;
+  const st=situacao(d);
+  const det=['T','O'].includes(d.sit)?st+' · '+hm(c.tot)+" produtivo · ocioso "+c.ocioso+" min · N "+hm(c.n)+" · HE50 "+hm(c.h50)+" · HE100 "+hm(c.h100):st;
   return `<div class="card" onclick="abrirDia('${dt}')" style="cursor:pointer"><div class="top"><b>${p2(dt.slice(8,10))}/${mm} · ${DS[new Date(dt+"T12:00").getDay()].slice(0,3)}</b><span class="alo">${d.ok?"✔ confirmado":""}</span></div><div class="sub">${det}</div></div>`;
  }).join("");
  const falt=[];
@@ -304,41 +328,42 @@ function vM(){
 }
 
 /* ===== Envio automático para o servidor (guarda na fila se estiver sem internet) ===== */
-/* Na primeira vez, envia também os dias lançados antes desta versão */
-try{if(!localStorage.getItem("apt_sync")){Object.keys(S.dias).forEach(k=>pend[k]=1);guardaPend();localStorage.setItem("apt_sync","1")}}catch(e){}
-const txtSync=()=>{const n=Object.keys(pend).length;return n?"⏳ "+n+" dia"+(n==1?"":"s")+" aguardando envio ao servidor":"☁️ Dados salvos no servidor"};
+/* Filas legadas não têm consentimento: ficam preservadas e exigem revisão. */
+const txtSync=()=>{
+ const ks=Object.keys(pend),bloq=ks.filter(k=>!pend[k]?.payload||pend[k].attempts>=8);
+ return ks.length?`${ks.length} dia(s) na fila. ${bloq.length} exige(m) abrir, revisar e confirmar novamente (legado ou erro permanente/limite de tentativas).`:'Sem envios pendentes. Rascunhos não são enviados.';
+};
 let enviando=false,tEnv=null;
 function enviar(){clearTimeout(tEnv);tEnv=setTimeout(enviarJa,1500)}
 async function enviarJa(){
- const ks=Object.keys(pend).filter(k=>S.dias[k]);
- Object.keys(pend).forEach(k=>{if(!S.dias[k])delete pend[k]});
- if(enviando||!ks.length||!/^https?:$/.test(location.protocol)){guardaPend();return}
+ if(enviando||!navigator.onLine||!/^https?:$/.test(location.protocol))return;
  enviando=true;
- const lote=ks.slice(0,200).map(k=>({dispositivo:dispositivo,funcao:funcao(),data:k.slice(k.indexOf("|")+1),dia:S.dias[k]}));
- const snap=lote.map(x=>JSON.stringify(x.dia));
- const url="/api/apontamentos",opts={method:"POST",headers:{"Content-Type":"application/json"}};
- let okAll=false;
  try{
-  const r=await fetch(url,{...opts,body:JSON.stringify(lote)});
-  if(r.ok)okAll=true;
-  else{
-   /* Fallback: se o servidor espera um único objeto por requisição, envia um por vez */
-   okAll=true;
-   for(const x of lote){
-    const rr=await fetch(url,{...opts,body:JSON.stringify(x)});
-    if(!rr.ok){okAll=false;break}
-   }
+  /* Um snapshot por requisição: erro permanente não bloqueia outros dias. */
+  const ks=Object.keys(pend).filter(k=>flow.eligible(k)).slice(0,200);
+  for(const k of ks){
+   const payload=clone(pend[k].payload);
+   let status=0;
+   try{
+    const r=await fetch('/api/apontamentos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(15000)});
+    status=r.status;
+    if(r.ok){flow.ack(k,payload);continue}
+    const h=r.headers.get('Retry-After'),seconds=Number(h);
+    const retryAfter=h?(Number.isFinite(seconds)?Math.max(0,seconds*1000):Math.max(0,Date.parse(h)-Date.now())):0;
+    flow.fail(k,payload,status,Number.isFinite(retryAfter)?retryAfter:0);
+   }catch(e){flow.fail(k,payload,status)}
   }
- }catch(e){}
- if(okAll)lote.forEach((x,i)=>{const k=dispositivo+"|"+x.data;if(JSON.stringify(S.dias[k])===snap[i])delete pend[k]});
- enviando=false;guardaPend();
- const el=$("#sync");if(el)el.textContent=txtSync();
- if(Object.keys(pend).length&&navigator.onLine)tEnv=setTimeout(enviarJa,ks.length>200?1000:60000);
+ }finally{
+  enviando=false;
+  const el=$('#sync');if(el)el.textContent=txtSync();
+  const active=Object.values(pend).filter(q=>q?.payload&&q.attempts<8);
+  if(active.length&&navigator.onLine)tEnv=setTimeout(enviarJa,Math.max(1000,Math.min(...active.map(q=>q.nextAt-Date.now()))));
+ }
 }
 addEventListener("online",enviar);
 
 /* ===== Exportação ===== */
-const situacao=d=>d.sit=="T"?"Trabalhado":d.sit=="A"?"Atestado":"Folga/Falta";
+const situacao=d=>d.sit==='O'?'Dia ocioso':d.sit=="T"?"Trabalhado":d.sit=="A"?"Atestado":"Folga/Falta";
 function linhas(m){
  const L=[];
  Object.keys(S.dias).filter(k=>k.startsWith(dispositivo+"|"+m)).sort().forEach(k=>{
@@ -346,9 +371,13 @@ function linhas(m){
   if(!d.sv.length)L.push([...b,"","","",c.n,c.h50,c.h100,ok]);
   d.sv.forEach((x,i)=>L.push([...b,x.os||"",x.osc||"",x.peso,A[i].n,A[i].h50,A[i].h100,ok]));
  });
- return L;
+ return L.map(row=>{
+  const d=S.dias[dispositivo+'|'+row[0]],c=calc(d,row[0]);
+  return [...row,JSON.stringify(canonicalDay(d).periodos_ociosos),c.bruto,c.almoco,c.ocioso,c.descontado,c.tot];
+ });
 }
-const CAB=["data","prestador","funcao","situacao","entrada","alm_saida","alm_volta","saida","os","os_completa","peso","min_normais","min_he50","min_he100","confirmado"];
+/* Totais diários repetem nas linhas de OS; não somar essas colunas por OS. */
+const CAB=["data","prestador","funcao","situacao","entrada","alm_saida","alm_volta","saida","os","os_completa","peso","min_normais","min_he50","min_he100","confirmado","periodos_ociosos","min_brutos","min_almoco","min_ociosos","min_descontados","min_produtivos"];
 const slug=t=>String(t).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_+|_+$/g,"").toLowerCase();
 async function exportar(fmt){
  const m=$("#mes").value,L=linhas(m);
@@ -374,5 +403,7 @@ async function instalar(){
 if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){
  addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})});
 }
+/* Eventos inline do HTML mantidos públicos; estado interno permanece no módulo. */
+Object.assign(window,{FUNCOES,setFuncao,trocarFuncao,abrirMes,voltarDia,mv,setD,setT,agora,setS,setP,copiarOntem,rm,desfazerRm,conf,reabrir,addSv,dg,okOS,repetir,setMes,abrirDia,exportar,instalar,addIdle,setIdle,rmIdle,confirmarSalvar,voltarCorrigir,cancelarRevisao,cancelarEdicao});
 R();enviar();
 </script></body></html>

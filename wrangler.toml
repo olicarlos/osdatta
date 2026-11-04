@@ -7,3 +7,10 @@ binding = "DB"
 database_name = "osdatta-db"
 database_id = "789b07eb-bf07-441c-b580-288316bfa5e2"
 migrations_dir = "migrations"
+
+[env.preview]
+[[env.preview.d1_databases]]
+binding = "DB"
+database_name = "osdatta-preview-ociosidade"
+database_id = "6672d0f0-2945-4bb8-89b2-d5d14a1a6b24"
+migrations_dir = "migrations"

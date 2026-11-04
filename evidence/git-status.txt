@@ -1,0 +1,15 @@
+M functions/api/apontamentos.ts
+ M package.json
+ M public/conferencia.html
+ M public/index.html
+ M public/sw.js
+ M wrangler.toml
+?? README-REVISAO.md
+?? evidence/
+?? graphify-out/
+?? migrations/0002_periodos_ociosos.sql
+?? node_modules/
+?? public/domain.d.ts
+?? public/domain.js
+?? public/workflow.js
+?? tests/

@@ -1,3 +1,6 @@
+import {dataValida,validateDay,canonicalDay,aprovado} from '../../public/domain.js';
+import type {Dia} from '../../public/domain.js';
+
 interface D1Result<T> {
   results: T[];
 }
@@ -24,6 +27,7 @@ interface Item {
   funcao?: unknown;
   data?: unknown;
   dia?: unknown;
+  periodos_ociosos?: unknown;
 }
 
 interface StoredRow {
@@ -32,13 +36,14 @@ interface StoredRow {
   pessoa: string;
   data: string;
   dia: string;
+  periodos_ociosos: string;
   atualizado_em: string;
 }
 
 const isTexto = (value: unknown): value is string => typeof value === "string";
-const isData = (value: unknown) => isTexto(value) && /^\d{4}-\d{2}-\d{2}$/.test(value);
+const isData = dataValida;
 
-const valido = (item: Item) =>
+const valido = (item: Item) => item !== null && typeof item === "object" && !Array.isArray(item) &&
   isTexto(item.dispositivo) && item.dispositivo.trim().length >= 1 && item.dispositivo.trim().length <= 64 &&
   isData(item.data) &&
   item.dia !== null && typeof item.dia === "object" && !Array.isArray(item.dia);
@@ -65,20 +70,25 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
     }
 
     const { results } = await env.DB.prepare(
-      `SELECT dispositivo, funcao, pessoa, data, dia, atualizado_em
+      `SELECT dispositivo, funcao, pessoa, data, dia, periodos_ociosos, atualizado_em
        FROM apontamentos
        WHERE data LIKE ?
        ORDER BY dispositivo ASC, data ASC`,
     ).bind(`${mes}-%`).all<StoredRow>();
 
-    const rows = results.map((row) => ({
+    const rows = results.map((row) => {
+      const dia = JSON.parse(row.dia), periodos = JSON.parse(row.periodos_ociosos ?? "[]");
+      if (!Array.isArray(periodos)) throw new Error("Coluna de períodos inválida");
+      return ({
       dispositivo: row.dispositivo,
       funcao: row.funcao,
       pessoa: row.pessoa,
       data: row.data,
-      dia: JSON.parse(row.dia),
+      dia: {...dia, periodos_ociosos:periodos},
+      periodos_ociosos:periodos,
       atualizadoEm: row.atualizado_em,
-    }));
+    });
+    });
     return json(rows, 200, { "Cache-Control": "no-store" });
   }
 
@@ -88,7 +98,9 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
 
   let items: Item[];
   try {
-    const body: unknown = await request.json();
+    const text = await request.text();
+    if (new TextEncoder().encode(text).length > 1024*1024) return json({erro:"Payload excede 1 MiB"},413);
+    const body: unknown = JSON.parse(text);
     items = Array.isArray(body) ? body : [body as Item];
   } catch {
     return json({ erro: "JSON inválido" }, 400);
@@ -98,19 +110,36 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
     return json({ erro: "Dados inválidos" }, 400);
   }
 
+  const normalized: Array<Item & {dia: Dia}> = [];
+  for (const item of items) {
+    const input = item.dia as Record<string, unknown>;
+    if (item.periodos_ociosos !== undefined && input.periodos_ociosos !== undefined &&
+        JSON.stringify(item.periodos_ociosos) !== JSON.stringify(input.periodos_ociosos)) {
+      return json({erro:'Períodos conflitantes no payload'},400);
+    }
+    const raw = {...input, ...(item.periodos_ociosos !== undefined ? {periodos_ociosos:item.periodos_ociosos} : {})};
+    if (raw.periodos_ociosos !== undefined && !Array.isArray(raw.periodos_ociosos)) return json({erro:'Períodos ociosos devem ser array, nunca null.'},400);
+    /* O normaliza períodos para toda jornada útil sem alterar OS/horários. */
+    const dia = canonicalDay(raw), errors = validateDay(dia);
+    if (errors.length) return json({erro:errors.join(' ')},400);
+    if (dia.sv.length && !aprovado(dia)) return json({erro:'Todas as OS exigem confirmação do snapshot antes do envio.'},400);
+    normalized.push({...item,dia});
+  }
+
   /* Se o mesmo dia vier repetido no lote, vale o último. */
-  const uniqueItems = new Map(items.map((item) => [
+  const uniqueItems = new Map(normalized.map((item) => [
     `${(item.dispositivo as string).trim()}|${item.data}`,
     item,
   ]));
 
   const statements = [...uniqueItems.values()].map((item) => env.DB.prepare(
-    `INSERT INTO apontamentos (dispositivo, pessoa, funcao, data, dia)
-     VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO apontamentos (dispositivo, pessoa, funcao, data, dia, periodos_ociosos)
+         VALUES (?, ?, ?, ?, ?, ?)
      ON CONFLICT(dispositivo, data) DO UPDATE SET
        funcao = excluded.funcao,
        pessoa = COALESCE(NULLIF(excluded.pessoa, ''), apontamentos.pessoa),
        dia = excluded.dia,
+       periodos_ociosos = excluded.periodos_ociosos,
        atualizado_em = CURRENT_TIMESTAMP`,
   ).bind(
     (item.dispositivo as string).trim(),
@@ -118,6 +147,7 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
     isTexto(item.funcao) ? item.funcao.slice(0, 40) : "",
     item.data as string,
     JSON.stringify(item.dia),
+    JSON.stringify(item.dia.periodos_ociosos),
   ));
 
   await env.DB.batch(statements);

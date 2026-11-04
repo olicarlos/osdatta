@@ -1,8 +1,10 @@
 /* Service worker: cache dos arquivos do app para funcionar offline */
-const CACHE = "apontamento-v4";
+const CACHE = "apontamento-preview-ociosidade-v5";
 const ARQS = [
   "./",
   "./index.html",
+  "./domain.js",
+  "./workflow.js",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png",

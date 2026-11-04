@@ -2,6 +2,11 @@
   "name": "osdatta",
   "private": true,
   "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "check": "node tests/check-syntax.js",
+    "preview:local": "node tests/preview-server.js"
+  },
   "dependencies": {
     "@netlify/database": "^2.0.1",
     "@netlify/functions": "^6.0.3",
