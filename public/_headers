@@ -1,0 +1,10 @@
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-YmnZl2ltWRpc+KYtmmXqzhnMhmNsg2V7PcauvZKHX0c=' 'sha256-Ntbs0Ss6KT4pAf78R47csQLDWCgLTyxtUYWgejHSQ8M='; script-src-attr 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; worker-src 'self'; manifest-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+/conferencia.html
+  Cache-Control: no-store
+/sw.js
+  Cache-Control: no-cache

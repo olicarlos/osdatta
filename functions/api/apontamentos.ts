@@ -1,3 +1,4 @@
+import {json,boundary,adminOK,configured,authorize,readJSON,BodyError} from '../../server/security.ts';
 import {dataValida,validateDay,canonicalDay,aprovado} from '../../public/domain.js';
 import type {Dia} from '../../public/domain.js';
 
@@ -19,6 +20,7 @@ interface D1Database {
 interface Env {
   DB: D1Database;
   ADMIN_KEY?: string;
+  DEVICE_TOKEN_SECRET?: string;
 }
 
 interface Item {
@@ -48,19 +50,15 @@ const valido = (item: Item) => item !== null && typeof item === "object" && !Arr
   isData(item.data) &&
   item.dia !== null && typeof item.dia === "object" && !Array.isArray(item.dia);
 
-const json = (body: unknown, status = 200, headers: HeadersInit = {}) =>
-  Response.json(body, { status, headers });
-
 /* Recebe os dias lançados no celular e grava (ou atualiza) no D1.
    GET ?mes=YYYY-MM atende à conferência do gestor (protegida por x-admin-key). */
-export async function onRequest(context: { request: Request; env: Env }): Promise<Response> {
+async function handle(context: { request: Request; env: Env }): Promise<Response> {
   const { request, env } = context;
   const url = new URL(request.url);
+  const rejected = boundary(request,["GET","POST"]); if (rejected) return rejected;
 
   if (request.method === "GET") {
-    const expected = env.ADMIN_KEY || "";
-    const key = request.headers.get("x-admin-key") || "";
-    if (!expected || key !== expected) {
+    if (!adminOK(request,env)) {
       return json({ erro: "Não autorizado" }, 401, { "Cache-Control": "no-store" });
     }
 
@@ -92,19 +90,12 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
     return json(rows, 200, { "Cache-Control": "no-store" });
   }
 
-  if (request.method !== "POST") {
-    return new Response("Method not allowed", { status: 405, headers: { Allow: "GET, POST" } });
-  }
-
-  let items: Item[];
-  try {
-    const text = await request.text();
-    if (new TextEncoder().encode(text).length > 1024*1024) return json({erro:"Payload excede 1 MiB"},413);
-    const body: unknown = JSON.parse(text);
-    items = Array.isArray(body) ? body : [body as Item];
-  } catch {
-    return json({ erro: "JSON inválido" }, 400);
-  }
+  if (!configured(env)) return json({erro:'Autorização indisponível'},503);
+  const device = await authorize(request,env);
+  if (!device) return json({erro:'Não autorizado'},401);
+  const body = await readJSON(request);
+  const items: Item[] = Array.isArray(body) ? body : [body as Item];
+  if (items.some(item => item && typeof item === 'object' && item.dispositivo !== device)) return json({erro:'Aparelho não autorizado'},403);
 
   if (!items.length || items.length > 400 || !items.every(valido)) {
     return json({ erro: "Dados inválidos" }, 400);
@@ -152,4 +143,9 @@ export async function onRequest(context: { request: Request; env: Env }): Promis
 
   await env.DB.batch(statements);
   return json({ ok: true, gravados: statements.length });
+}
+
+export async function onRequest(context: {request: Request; env: Env}): Promise<Response> {
+  try { return await handle(context); }
+  catch (error) { return json({erro:error instanceof BodyError ? 'Requisição inválida' : 'Serviço indisponível'},error instanceof BodyError ? error.status : 503); }
 }

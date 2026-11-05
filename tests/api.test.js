@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {onRequest} from '../functions/api/apontamentos.ts';
+import {authorizedHandler,devToken} from './auth-fixture.js';
+const onRequest=authorizedHandler('dev');
 import {confirmar} from '../public/domain.js';
 const day=()=>({sit:'T',e:'07:30',s:'17:18',as:'12:00',av:'13:00',sv:[{os:'1234',osc:'202601234',peso:2}],periodos_ociosos:[{inicio:'09:00',fim:'09:15'},{inicio:'15:00',fim:'15:30'}]});
 function db(){const calls=[];return {calls,prepare(query){const stmt={query,values:[],bind(...v){this.values=v;return this},async all(){return {results:[]}}};return stmt},async batch(statements){calls.push(...statements);return []}}}

@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {onRequest} from '../functions/api/apontamentos.ts';
+import {authorizedHandler,devToken} from './auth-fixture.js';
+const onRequest=authorizedHandler('fixture');
 import {confirmar,validateDay,calcDay,canonicalDay} from '../public/domain.js';
 import {localD1} from './d1.js';
 import {app} from './app-harness.js';

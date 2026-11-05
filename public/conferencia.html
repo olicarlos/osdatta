@@ -52,6 +52,7 @@ details{margin-top:10px}summary{font-weight:700;color:var(--t);padding:8px 0;cur
       <div class="f"><label for="mes">Mês de referência</label><input type="month" id="mes"></div>
       <p class="sub" style="margin-bottom:0">Somente leitura. Horas calculadas como no app: jornada de 528 min/dia útil; fim de semana ou feriado conta 100% HE; almoço descontado quando saída e volta são válidas.</p>
     </div>
+    <details class="card"><summary>Autorizar aparelho</summary><label for="deviceId">UUID informado pelo aparelho</label><input type="text" id="deviceId" autocomplete="off"><button class="b" id="emitir">Gerar credencial (90 dias)</button><p class="sub">Transfira por canal seguro. A credencial não integra os relatórios. Limpe após transferir.</p><textarea id="issuedToken" readonly aria-label="Credencial emitida"></textarea><button class="b o" id="limparToken">Limpar credencial</button><p id="tokenStatus" role="status"></p></details>
     <div id="msg"></div>
     <div id="totais"></div>
     <div id="lista"></div>
@@ -85,18 +86,19 @@ const $=s=>document.querySelector(s);
 const login=$("#login"), conteudo=$("#conteudo"), msg=$("#msg"), lista=$("#lista"), totais=$("#totais"), aviso=$("#aviso"), mesEl=$("#mes");
 
 mesEl.value=hoje().slice(0,7);
-$("#sair").onclick=()=>{try{sessionStorage.removeItem(CHAVE)}catch(e){}senha="";conteudo.style.display="none";$("#sair").style.display="none";mostrarLogin("")};
+$("#sair").onclick=()=>{$("#senha").value="";$("#issuedToken").value="";lista.innerHTML="";totais.innerHTML="";try{sessionStorage.removeItem(CHAVE)}catch(e){}senha="";conteudo.style.display="none";$("#sair").style.display="none";mostrarLogin("")};
 $("#entrar").onclick=entrar;
 $("#senha").addEventListener("keydown",e=>{if(e.key==="Enter")entrar()});
 mesEl.onchange=carregar;
 
 function mostrarLogin(erro){
+ $("#senha").value="";$("#issuedToken").value="";
  login.style.display="block";conteudo.style.display="none";$("#sair").style.display="none";
  $("#loginMsg").innerHTML=erro?`<div class="w e">${esc(erro)}</div>`:"";
  setTimeout(()=>$("#senha").focus(),50);
 }
 function entrar(){
- const v=$("#senha").value;
+ const v=$("#senha").value;$("#senha").value="";
  if(!v){$("#loginMsg").innerHTML='<div class="w e">Digite a senha.</div>';return}
  senha=v;
  try{sessionStorage.setItem(CHAVE,senha)}catch(e){}
@@ -204,7 +206,7 @@ function render(dados,mes){
       const diaNum=x.data.slice(8,10)+"/"+x.data.slice(5,7);
       const sem=x.data+"T12:00";
       const dow=DS[new Date(sem).getDay()];
-      return `<div class="card"><div class="reg"><span>${diaNum} ${dow} · ${situacao(x.d)}${x.ok?" ✔":""}</span><span><b>${hm(x.c.tot)}</b>${x.c.h100?` · HE100 ${hm(x.c.h100)}`:""}${x.c.h50?` · HE50 ${hm(x.c.h50)}`:""}</span></div><p class="sub">Bruto ${x.c.bruto} min · almoço ${x.c.almoco} min · ocioso ${x.c.ocioso} min · descontado ${x.c.descontado} min · produtivo ${x.c.tot} min</p>${(x.d.periodos_ociosos||[]).map(p=>`<p class="sub">Ocioso: ${esc(p.inicio)} – ${esc(p.fim)}</p>`).join('')}${validateDay(x.d).map(e=>`<p class="w e">Registro inválido: ${esc(e)} Totais zerados; revisar origem.</p>`).join('')}</div>`;
+      return `<div class="card"><div class="reg"><span>${esc(diaNum)} ${esc(dow)} · ${situacao(x.d)}${x.ok?" ✔":""}</span><span><b>${hm(x.c.tot)}</b>${x.c.h100?` · HE100 ${hm(x.c.h100)}`:""}${x.c.h50?` · HE50 ${hm(x.c.h50)}`:""}</span></div><p class="sub">Bruto ${x.c.bruto} min · almoço ${x.c.almoco} min · ocioso ${x.c.ocioso} min · descontado ${x.c.descontado} min · produtivo ${x.c.tot} min</p>${(x.d.periodos_ociosos||[]).map(p=>`<p class="sub">Ocioso: ${esc(p.inicio)} – ${esc(p.fim)}</p>`).join('')}${validateDay(x.d).map(e=>`<p class="w e">Registro inválido: ${esc(e)} Totais zerados; revisar origem.</p>`).join('')}</div>`;
     }).join("")}
    </details>
   </div>`;
@@ -215,6 +217,16 @@ function render(dados,mes){
  aviso.style.display="none";
 }
 
+$('#limparToken').onclick=()=>{$('#issuedToken').value='';$('#tokenStatus').textContent=''};
+$('#emitir').onclick=async()=>{
+ $('#issuedToken').value='';$('#tokenStatus').textContent='';
+ if(!senha)return;
+ try{
+  const response=await fetch('/api/device-token',{method:'POST',headers:{'Content-Type':'application/json','x-admin-key':senha},body:JSON.stringify({dispositivo:$('#deviceId').value.trim()}),cache:'no-store'});
+  if(!response.ok){$('#tokenStatus').textContent='Emissão recusada. Confira UUID e sessão administrativa.';return}
+  const result=await response.json();$('#issuedToken').value=result.token;$('#tokenStatus').textContent='Expira em '+result.expiresAt;
+ }catch(e){$('#tokenStatus').textContent='Não foi possível emitir. Tente novamente.'}
+};
 /* tenta entrar direto se já houver senha na sessão desta aba */
 if(senha)carregar();else mostrarLogin("");
 </script></body></html>

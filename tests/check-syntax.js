@@ -19,5 +19,5 @@ for(const name of readdirSync(new URL('../public/',import.meta.url))){
  }
 }
 const compiler=process.env.TSC_PATH||'node_modules/typescript/bin/tsc';
-check([compiler,'--noEmit','--strict','--target','es2022','--module','es2022','--moduleResolution','bundler','--skipLibCheck','--lib','es2022,dom','functions/api/apontamentos.ts']);
+check([compiler,'--noEmit','--allowImportingTsExtensions','--strict','--target','es2022','--module','es2022','--moduleResolution','bundler','--skipLibCheck','--lib','es2022,dom','functions/api/apontamentos.ts','functions/api/device-token.ts','netlify/functions/apontamentos.ts']);
 process.exitCode=failures?1:0;

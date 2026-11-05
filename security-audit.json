@@ -1,0 +1,16 @@
+{
+  "scope": "tracked current source snapshot; excludes dependencies, evidence binaries and history",
+  "files_scanned": 41,
+  "matches": [
+    {
+      "path": "tests/preview-server.js",
+      "line": 16,
+      "type": "credential-assignment"
+    },
+    {
+      "path": "tests/regression.test.js",
+      "line": 41,
+      "type": "credential-assignment"
+    }
+  ]
+}

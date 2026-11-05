@@ -1,2 +1,5 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+# CSP hashes must remain stable across Windows and Cloudflare checkouts.
+public/*.html text eol=lf
+public/_headers text eol=lf

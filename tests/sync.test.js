@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {app} from './app-harness.js';
-import {onRequest} from '../functions/api/apontamentos.ts';
+import {authorizedHandler,devToken} from './auth-fixture.js';
+const onRequest=authorizedHandler('dev');
 import {localD1} from './d1.js';
 const setup=()=>{
- const a=app();a.run(`setD('2026-11-04');setT('e','07:30');setT('s','17:18');setT('as','12:00');setT('av','13:00');w.os='1234';okOS();conf();confirmarSalvar()`);return a;
+ const a=app({apt_device_token:devToken});a.run(`setD('2026-11-04');setT('e','07:30');setT('s','17:18');setT('as','12:00');setT('av','13:00');w.os='1234';okOS();conf();confirmarSalvar()`);return a;
 };
 test('offline aprovado → reload → sync usa payload JSON idêntico, nunca draft editado',async()=>{
  const a=setup(),payload=JSON.parse(a.store.get('apt_pend'))['dev|2026-11-04'].payload;
@@ -41,7 +42,7 @@ test('erro permanente não faz fallback nem loop; orçamento transitório persis
   a.context.fetch=async()=>{attempts++;return new Response('{}',{status,headers:{'Retry-After':'10'}})};
   await a.run('enviarJa()');await a.run('enviarJa()');assert.equal(attempts,1);
   const q=JSON.parse(a.store.get('apt_pend'))['dev|2026-11-04'];
-  assert.equal(q.attempts,status<429?8:1);assert.ok(q.nextAt>Date.now());
+  assert.equal(q.attempts,[401,403].includes(status)?0:status<429?8:1);if(![401,403].includes(status))assert.ok(q.nextAt>Date.now());
   const b=app(Object.fromEntries(a.store));assert.equal(b.run("pend['dev|2026-11-04'].attempts"),q.attempts);
  }
 });

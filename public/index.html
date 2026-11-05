@@ -47,7 +47,7 @@ details{margin-top:24px}summary{font-weight:700;color:var(--t);padding:10px 0}
 </style></head><body>
 <div id="app"></div>
 <div id="toast"></div>
-<div id="inst"><button onclick="instalar()">📱 Instalar aplicativo</button><small>Cria um ícone na tela inicial e funciona offline.</small></div>
+<div id="inst"><button data-click="instalar()">📱 Instalar aplicativo</button><small>Cria um ícone na tela inicial e funciona offline.</small></div>
 <script type="module">
 import {calcDay,validateDay,canonicalDay,clone,aprovado} from './domain.js';
 import {Workflow} from './workflow.js';
@@ -108,7 +108,7 @@ try{
 if(!dispositivo)dispositivo=uuid();
 
 let funcaoAtual="";try{const f=localStorage.getItem("apt_f")||"";if(FUNCOES.indexOf(f)>=0)funcaoAtual=f}catch(e){}
-let rec=[];try{const r=JSON.parse(localStorage.getItem("apt_recent")||"[]");if(Array.isArray(r))rec=r.filter(x=>x&&x.os)}catch(e){}
+let rec=[];try{const r=JSON.parse(localStorage.getItem("apt_recent")||"[]");if(Array.isArray(r))rec=r.filter(x=>x&&/^\d{4}$/.test(x.os))}catch(e){}
 
 let data=hoje(),tela=funcaoAtual?"dia":"funcao",w={os:""},telaAtual=null,mesSel=data.slice(0,7);
 const funcao=()=>funcaoAtual;
@@ -128,7 +128,7 @@ const guardaPend=()=>{try{localStorage.setItem("apt_pend",JSON.stringify(pend))}
 let toastTimer=null;
 function toast(msg,undo,ms){
  const el=$("#toast");if(!el)return;
- el.innerHTML="<span>"+esc(msg)+"</span>"+(undo?'<button onclick="desfazerRm()">Desfazer</button>':"");
+ el.innerHTML="<span>"+esc(msg)+"</span>"+(undo?'<button data-click="desfazerRm()">Desfazer</button>':"");
  el.classList.add("on");
  clearTimeout(toastTimer);
  toastTimer=setTimeout(()=>el.classList.remove("on"),ms||6000);
@@ -180,7 +180,7 @@ function R(topo){
 function vF(){
  return `<header><b>Apontamento de serviços</b></header><main>
  <p class="sub">Escolha sua função. Os apontamentos ficam salvos somente neste aparelho.</p>
- ${FUNCOES.map((f,i)=>`<button class="b p" onclick="setFuncao(FUNCOES[${i}])">${esc(f)}${funcaoAtual===f?" ✔":""}</button>`).join("")}
+ ${FUNCOES.map((f,i)=>`<button class="b p" data-click="setFuncao(FUNCOES[${i}])">${esc(f)}${funcaoAtual===f?" ✔":""}</button>`).join("")}
  <p class="sub">Trocar de função não apaga os apontamentos já feitos.</p></main>`;
 }
 function setFuncao(f){funcaoAtual=f;try{localStorage.setItem("apt_f",f)}catch(e){}tela="dia";R(true)}
@@ -189,37 +189,38 @@ function trocarFuncao(){tela="funcao";R(true)}
 /* ===== Tela: dia ===== */
 function vD(){
  const d=dia(),c=calc(d,data),A=aloc(d,c),dt=new Date(data+"T12:00"),esp=especial(data),dis=d.ok?"disabled":"",V=erros(d,c);
- const campo=(k,l)=>`<div class="f"><label>${l}</label><input type="time" ${dis} value="${d[k]}" onchange="setT('${k}',this.value)"><button class="s" ${dis} onclick="agora('${k}')">Agora</button></div>`;
+ const campo=(k,l)=>`<div class="f"><label>${l}</label><input type="time" ${dis} value="${esc(d[k])}" data-change="setT('${k}',this.value)"><button class="s" ${dis} data-click="agora('${k}')">Agora</button></div>`;
  const sits=[["T","Trabalhei"],["O","Dia ocioso"],["A","Atestado"],["F","Folga/Falta"]];
- const recBtns=rec.filter(r=>!d.sv.some(x=>x.os===r.os)).slice(0,8).map(r=>`<button class="s" ${dis} onclick="repetir('${esc(r.os)}')">Repetir: OS ${esc(r.os)}</button>`).join("");
- return `<header><b class="hfun">${esc(funcaoAtual)}</b><div style="display:flex;gap:8px"><button onclick="abrirMes()">📅 Mês</button><button onclick="trocarFuncao()">Trocar</button></div></header><main>
- <div class="row"><button class="s" onclick="mv(-1)">‹ Dia anterior</button><button class="s" onclick="mv(1)">Próximo dia ›</button></div>
- <input type="date" value="${data}" onchange="setD(this.value)" style="margin-top:8px">
+ const recBtns=rec.filter(r=>!d.sv.some(x=>x.os===r.os)).slice(0,8).map(r=>`<button class="s" ${dis} data-click="repetir('${esc(r.os)}')">Repetir: OS ${esc(r.os)}</button>`).join("");
+ return `<header><b class="hfun">${esc(funcaoAtual)}</b><div style="display:flex;gap:8px"><button data-click="abrirMes()">📅 Mês</button><button data-click="trocarFuncao()">Trocar</button></div></header><main>
+ <div class="row"><button class="s" data-click="mv(-1)">‹ Dia anterior</button><button class="s" data-click="mv(1)">Próximo dia ›</button></div>
+ <input type="date" value="${data}" data-change="setD(this.value)" style="margin-top:8px">
  <p class="sub"><b>${DS[dt.getDay()]}, ${data.split("-").reverse().join("/")}</b>${esp?" · fim de semana ou feriado: horas contam como HE 100%":""}</p>
- <div class="chips">${sits.map(([k,l])=>`<button class="chip ${d.sit==k?"on":""}" ${dis} onclick="setS('${k}')">${l}</button>`).join("")}</div>
+ <div class="chips">${sits.map(([k,l])=>`<button class="chip ${d.sit==k?"on":""}" ${dis} data-click="setS('${k}')">${l}</button>`).join("")}</div>
  <p class="w" role="status">${d.ok?'Snapshot salvo. Reabrir cria rascunho sem alterar histórico.':'Rascunho local: ainda não salvo nem enviado. Use Salvar dia.'}</p>
  ${d.sit==="O"?'<p class="sub">Dia ocioso: informe os horários reais. Toda jornada, exceto almoço, será ociosa. OS e horários anteriores são preservados; trocar o tipo é reversível.</p>':''}
  ${['T','O'].includes(d.sit)?`<h2>Horários</h2><div class="grid">${campo("e","Entrada")}${campo("s","Saída")}${campo("as","Saiu para o almoço")}${campo("av","Voltou do almoço")}</div>
- <button class="s" ${dis} onclick="copiarOntem()">⧉ Copiar horários de ontem</button>
+ <button class="s" ${dis} data-click="copiarOntem()">⧉ Copiar horários de ontem</button>
  <h2>Períodos ociosos</h2>
- ${(canonicalDay(d).periodos_ociosos||[]).map((p,i)=>`<div class="card"><div class="grid"><label>Início<input aria-label="Início ocioso ${i+1}" type="time" ${dis} ${d.sit==='O'?'disabled':''} value="${esc(p.inicio)}" onchange="setIdle(${i},'inicio',this.value)"></label><label>Fim<input aria-label="Fim ocioso ${i+1}" type="time" ${dis} ${d.sit==='O'?'disabled':''} value="${esc(p.fim)}" onchange="setIdle(${i},'fim',this.value)"></label></div>${d.sit==='T'?`<button class="s" ${dis} onclick="rmIdle(${i})">Remover período ${i+1}</button>`:''}</div>`).join('')}
- ${d.sit==='T'?`<button class="b o" ${dis} onclick="addIdle()">+ Adicionar período ocioso</button>`:''}
+ ${(canonicalDay(d).periodos_ociosos||[]).map((p,i)=>`<div class="card"><div class="grid"><label>Início<input aria-label="Início ocioso ${i+1}" type="time" ${dis} ${d.sit==='O'?'disabled':''} value="${esc(p.inicio)}" data-change="setIdle(${i},'inicio',this.value)"></label><label>Fim<input aria-label="Fim ocioso ${i+1}" type="time" ${dis} ${d.sit==='O'?'disabled':''} value="${esc(p.fim)}" data-change="setIdle(${i},'fim',this.value)"></label></div>${d.sit==='T'?`<button class="s" ${dis} data-click="rmIdle(${i})">Remover período ${i+1}</button>`:''}</div>`).join('')}
+ ${d.sit==='T'?`<button class="b o" ${dis} data-click="addIdle()">+ Adicionar período ocioso</button>`:''}
  <h2>Serviços do dia</h2>
  <p class="sub">As horas do dia são divididas entre os serviços pelo peso: Rápido 1, Normal 2, Demorado 3 (o Demorado recebe 1,5× o Normal).</p>
- ${d.sv.map((x,i)=>`<div class="card"><div class="top"><b>OS ${esc(x.os)}</b><button class="x" ${dis} onclick="rm(${i})">✕</button></div>
- <div class="chips">${PESOS.map(([l,v])=>`<button class="chip ${x.peso==v?"on":""}" ${dis} onclick="setP(${i},${v})">${l}</button>`).join("")}</div>
+ ${d.sv.map((x,i)=>`<div class="card"><div class="top"><b>OS ${esc(x.os)}</b><button class="x" ${dis} data-click="rm(${i})">✕</button></div>
+ <div class="chips">${PESOS.map(([l,v])=>`<button class="chip ${x.peso==v?"on":""}" ${dis} data-click="setP(${i},${v})">${l}</button>`).join("")}</div>
  <div class="alo">Tempo estimado: ${hm(A[i].n+A[i].h50+A[i].h100)}</div></div>`).join("")}
  ${recBtns?`<div class="grid" style="margin-top:4px">${recBtns}</div>`:""}
- <button class="b o" ${dis} onclick="addSv()">+ Adicionar serviço</button>`:""}
+ <button class="b o" ${dis} data-click="addSv()">+ Adicionar serviço</button>`:""}
  <div class="sum"><big>Produtivo: ${hm(c.tot)} · ${d.sv.length} serviços</big>Bruto ${c.bruto} min · almoço ${c.almoco} min · ocioso ${c.ocioso} min · descontado ${c.descontado} min<br>Normais ${hm(c.n)} · HE 50% ${hm(c.h50)} · HE 100% ${hm(c.h100)}</div>
- ${V.er.map(t=>`<div class="w e">${t}</div>`).join("")}${V.wa.map(t=>`<div class="w">${t}</div>`).join("")}
- ${d.ok?`<div class="ok">✔ Dia confirmado</div><button class="b o" onclick="reabrir()">Reabrir dia</button>`:`<button class="b p" ${V.er.length?"disabled":""} onclick="conf()">Salvar dia / Confirmar dia</button><button class="b o" onclick="cancelarEdicao()">Descartar rascunho</button>`}
+ ${V.er.map(t=>`<div class="w e">${esc(t)}</div>`).join("")}${V.wa.map(t=>`<div class="w">${esc(t)}</div>`).join("")}
+ ${d.ok?`<div class="ok">✔ Dia confirmado</div><button class="b o" data-click="reabrir()">Reabrir dia</button>`:`<button class="b p" ${V.er.length?"disabled":""} data-click="conf()">Salvar dia / Confirmar dia</button><button class="b o" data-click="cancelarEdicao()">Descartar rascunho</button>`}
  <div class="sync" id="sync">${txtSync()}</div>
+ <details><summary>Autorizar este aparelho</summary><p>UUID: <b>${esc(dispositivo)}</b></p><p class="sub">Solicite ao gestor uma credencial para este UUID. Sem autorização, os registros continuam salvos offline.</p><input type="password" id="deviceToken" autocomplete="off" aria-label="Credencial do aparelho"><button class="b" data-click="autorizarAparelho()">Guardar credencial</button><button class="b o" data-click="removerAutorizacao()">Remover credencial</button></details>
  <details><summary>Enviar o mês</summary><input type="month" id="mes" value="${data.slice(0,7)}">
- <button class="b" onclick="exportar('csv')">Enviar planilha (CSV)</button><button class="b o" onclick="exportar('json')">Enviar arquivo JSON</button>
+ <button class="b" data-click="exportar('csv')">Enviar planilha (CSV)</button><button class="b o" data-click="exportar('json')">Enviar arquivo JSON</button>
  <p class="sub">Abre o compartilhamento do celular (WhatsApp, e-mail). Se não abrir, o arquivo é baixado.</p></details></main>`;
 }
-const setD=v=>{if(v){data=v;R(true)}};
+const setD=v=>{if(/^\d{4}-\d{2}-\d{2}$/.test(v)){data=v;R(true)}};
 function mv(n){const d=new Date(data+"T12:00");d.setDate(d.getDate()+n);data=d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());R(true)}
 function setT(k,v){dia()[k]=v;save();R()}
 function agora(k){const n=new Date();setT(k,p2(n.getHours())+":"+p2(n.getMinutes()))}
@@ -266,7 +267,7 @@ function conf(){
 function vRevisao(){
  if(!revisao)return '<main>Revisão expirada. Volte ao dia.</main>';
  const p=revisao.payload,c=calc(p.dia,p.data);
- return `<header><b>Revisar dia</b></header><main aria-labelledby="tituloRevisao"><h2 id="tituloRevisao" tabindex="-1">Confira TODAS as OS antes de salvar</h2><p>${esc(p.data)} · ${esc(situacao(p.dia))}</p><ol>${p.dia.sv.map(x=>`<li class="card">OS completa <b>${esc(x.osc)}</b> · sufixo <b>${esc(x.os)}</b> · peso ${x.peso}</li>`).join('')}</ol>${p.dia.sv.length?'':'<p>Dia sem OS.</p>'}<p>Produtivo ${c.tot} min · ocioso ${c.ocioso} min.</p><p>Somente este snapshot será salvo e enviado. Duplicadas também estão listadas.</p><button class="b" onclick="confirmarSalvar()">Confirmar e salvar</button><button class="b o" onclick="voltarCorrigir()">Voltar para corrigir</button><button class="b o" onclick="cancelarRevisao()">Cancelar</button></main>`;
+ return `<header><b>Revisar dia</b></header><main aria-labelledby="tituloRevisao"><h2 id="tituloRevisao" tabindex="-1">Confira TODAS as OS antes de salvar</h2><p>${esc(p.data)} · ${esc(situacao(p.dia))}</p><ol>${p.dia.sv.map(x=>`<li class="card">OS completa <b>${esc(x.osc)}</b> · sufixo <b>${esc(x.os)}</b> · peso ${esc(x.peso)}</li>`).join('')}</ol>${p.dia.sv.length?'':'<p>Dia sem OS.</p>'}<p>Produtivo ${c.tot} min · ocioso ${c.ocioso} min.</p><p>Somente este snapshot será salvo e enviado. Duplicadas também estão listadas.</p><button class="b" data-click="confirmarSalvar()">Confirmar e salvar</button><button class="b o" data-click="voltarCorrigir()">Voltar para corrigir</button><button class="b o" data-click="cancelarRevisao()">Cancelar</button></main>`;
 }
 function confirmarSalvar(){
  if(!revisao)return;
@@ -281,10 +282,10 @@ function reabrir(){flow.edit(key(),dia());R();toast('Rascunho aberto. Snapshot s
 function addSv(){w={os:""};tela="os";R(true)}
 function vOS(){
  const ano=data.slice(0,4);
- return `<header><b>Número da OS</b><button onclick="voltarDia()">Voltar</button></header><main>
- <div class="osd">OS ${ano}0<b>${(w.os+"____").slice(0,4)}</b></div>
+ return `<header><b>Número da OS</b><button data-click="voltarDia()">Voltar</button></header><main>
+ <div class="osd">OS ${ano}0<b>${esc((w.os+"____").slice(0,4))}</b></div>
  <p class="sub">Digite os 4 últimos números da OS.</p>
- <div class="kp">${[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="dg(${n})">${n}</button>`).join("")}<button onclick="dg('b')">⌫</button><button onclick="dg(0)">0</button><button class="g" ${w.os.length<4?"disabled":""} onclick="okOS()">OK</button></div></main>`;
+ <div class="kp">${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-click="dg(${n})">${n}</button>`).join("")}<button data-click="dg('b')">⌫</button><button data-click="dg(0)">0</button><button class="g" ${w.os.length<4?"disabled":""} data-click="okOS()">OK</button></div></main>`;
 }
 function dg(n){w.os=n==="b"?w.os.slice(0,-1):(w.os.length<4?w.os+n:w.os);R()}
 function okOS(){
@@ -295,18 +296,18 @@ function voltarDia(){tela="dia";R(true)}
 
 /* ===== Tela: resumo do mês (somente dados deste aparelho) ===== */
 function abrirMes(){mesSel=data.slice(0,7);tela="mes";R(true)}
-function setMes(v){if(v){mesSel=v;R(true)}}
-function abrirDia(dt){if(!dt)return;data=dt;tela="dia";R(true)}
+function setMes(v){if(/^\d{4}-\d{2}$/.test(v)){mesSel=v;R(true)}}
+function abrirDia(dt){if(!/^\d{4}-\d{2}-\d{2}$/.test(dt))return;data=dt;tela="dia";R(true)}
 function vM(){
  const m=mesSel,mm=m.slice(5,7),ano=+m.slice(0,4),ultimo=new Date(ano,+mm,0).getDate();
  const tot={n:0,h50:0,h100:0,tot:0};
- const chaves=Object.keys(S.dias).filter(k=>k.startsWith(dispositivo+"|"+m)&&temDados(S.dias[k])).sort();
+ const chaves=Object.keys(S.dias).filter(k=>k.startsWith(dispositivo+"|"+m)&&/^\d{4}-\d{2}-\d{2}$/.test(k.slice(k.indexOf("|")+1))&&temDados(S.dias[k])).sort();
  chaves.forEach(k=>{const dt=k.slice(k.indexOf("|")+1),c=calc(S.dias[k],dt);tot.n+=c.n;tot.h50+=c.h50;tot.h100+=c.h100;tot.tot+=c.tot});
  const lista=chaves.map(k=>{
   const dt=k.slice(k.indexOf("|")+1),d=S.dias[k],c=calc(d,dt);
   const st=situacao(d);
   const det=['T','O'].includes(d.sit)?st+' · '+hm(c.tot)+" produtivo · ocioso "+c.ocioso+" min · N "+hm(c.n)+" · HE50 "+hm(c.h50)+" · HE100 "+hm(c.h100):st;
-  return `<div class="card" onclick="abrirDia('${dt}')" style="cursor:pointer"><div class="top"><b>${p2(dt.slice(8,10))}/${mm} · ${DS[new Date(dt+"T12:00").getDay()].slice(0,3)}</b><span class="alo">${d.ok?"✔ confirmado":""}</span></div><div class="sub">${det}</div></div>`;
+  return `<div class="card" data-click="abrirDia('${dt}')" style="cursor:pointer"><div class="top"><b>${p2(dt.slice(8,10))}/${mm} · ${DS[new Date(dt+"T12:00").getDay()].slice(0,3)}</b><span class="alo">${d.ok?"✔ confirmado":""}</span></div><div class="sub">${det}</div></div>`;
  }).join("");
  const falt=[];
  for(let dia=1;dia<=ultimo;dia++){
@@ -314,10 +315,10 @@ function vM(){
   if(dt>hoje())break;
   if(especial(dt))continue;
   if(temDados(S.dias[dispositivo+"|"+dt]))continue;
-  falt.push(`<div class="card"><div class="top"><b>${p2(dia)}/${mm} · ${DS[new Date(dt+"T12:00").getDay()].slice(0,3)}</b><button class="s" style="width:auto;margin:0;padding:0 16px" onclick="abrirDia('${dt}')">Preencher</button></div><div class="sub">Sem registro</div></div>`);
+  falt.push(`<div class="card"><div class="top"><b>${p2(dia)}/${mm} · ${DS[new Date(dt+"T12:00").getDay()].slice(0,3)}</b><button class="s" style="width:auto;margin:0;padding:0 16px" data-click="abrirDia('${dt}')">Preencher</button></div><div class="sub">Sem registro</div></div>`);
  }
- return `<header><b>Resumo do mês</b><button onclick="voltarDia()">Voltar</button></header><main>
- <input type="month" id="mesSel" value="${m}" onchange="setMes(this.value)">
+ return `<header><b>Resumo do mês</b><button data-click="voltarDia()">Voltar</button></header><main>
+ <input type="month" id="mesSel" value="${m}" data-change="setMes(this.value)">
  <div class="sum"><big>${chaves.length} dia${chaves.length==1?"":"s"} registrado${chaves.length==1?"":"s"} · ${hm(tot.tot)}</big>Normais ${hm(tot.n)} · HE 50% ${hm(tot.h50)} · HE 100% ${hm(tot.h100)}</div>
  <h2>Dias do mês</h2>
  ${lista||'<p class="sub">Nenhum dia registrado neste mês.</p>'}
@@ -329,14 +330,23 @@ function vM(){
 
 /* ===== Envio automático para o servidor (guarda na fila se estiver sem internet) ===== */
 /* Filas legadas não têm consentimento: ficam preservadas e exigem revisão. */
+let deviceToken='';try{deviceToken=localStorage.getItem('apt_device_token')||''}catch(e){}
+let authorizationBlocked=false;
+function autorizarAparelho(){
+ const input=$('#deviceToken'),value=input.value.trim();input.value='';
+ if(!/^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/.test(value)||value.length>2048){toast('Credencial inválida.');return}
+ try{localStorage.setItem('apt_device_token',value);deviceToken=value;authorizationBlocked=false;R();enviar()}catch(e){toast('Não foi possível guardar a credencial.')}
+}
+function removerAutorizacao(){try{localStorage.removeItem('apt_device_token')}catch(e){}deviceToken='';authorizationBlocked=false;clearTimeout(tEnv);R()}
 const txtSync=()=>{
+ const authNotice=(!deviceToken||authorizationBlocked)?'Autorização do aparelho necessária. Histórico e fila preservados; solicite credencial ao gestor. ':'';
  const ks=Object.keys(pend),bloq=ks.filter(k=>!pend[k]?.payload||pend[k].attempts>=8);
- return ks.length?`${ks.length} dia(s) na fila. ${bloq.length} exige(m) abrir, revisar e confirmar novamente (legado ou erro permanente/limite de tentativas).`:'Sem envios pendentes. Rascunhos não são enviados.';
+ return authNotice+(ks.length?`${ks.length} dia(s) na fila. ${bloq.length} exige(m) abrir, revisar e confirmar novamente (legado ou erro permanente/limite de tentativas).`:'Sem envios pendentes. Rascunhos não são enviados.');
 };
 let enviando=false,tEnv=null;
 function enviar(){clearTimeout(tEnv);tEnv=setTimeout(enviarJa,1500)}
 async function enviarJa(){
- if(enviando||!navigator.onLine||!/^https?:$/.test(location.protocol))return;
+ if(!deviceToken||authorizationBlocked||enviando||!navigator.onLine||!/^https?:$/.test(location.protocol))return;
  enviando=true;
  try{
   /* Um snapshot por requisição: erro permanente não bloqueia outros dias. */
@@ -345,8 +355,9 @@ async function enviarJa(){
    const payload=clone(pend[k].payload);
    let status=0;
    try{
-    const r=await fetch('/api/apontamentos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(15000)});
+    const r=await fetch('/api/apontamentos',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+deviceToken},body:JSON.stringify(payload),signal:AbortSignal.timeout(15000)});
     status=r.status;
+    if(status===401||status===403){authorizationBlocked=true;break}
     if(r.ok){flow.ack(k,payload);continue}
     const h=r.headers.get('Retry-After'),seconds=Number(h);
     const retryAfter=h?(Number.isFinite(seconds)?Math.max(0,seconds*1000):Math.max(0,Date.parse(h)-Date.now())):0;
@@ -357,7 +368,7 @@ async function enviarJa(){
   enviando=false;
   const el=$('#sync');if(el)el.textContent=txtSync();
   const active=Object.values(pend).filter(q=>q?.payload&&q.attempts<8);
-  if(active.length&&navigator.onLine)tEnv=setTimeout(enviarJa,Math.max(1000,Math.min(...active.map(q=>q.nextAt-Date.now()))));
+  if(!authorizationBlocked&&deviceToken&&active.length&&navigator.onLine)tEnv=setTimeout(enviarJa,Math.max(1000,Math.min(...active.map(q=>q.nextAt-Date.now()))));
  }
 }
 addEventListener("online",enviar);
@@ -379,10 +390,11 @@ function linhas(m){
 /* Totais diários repetem nas linhas de OS; não somar essas colunas por OS. */
 const CAB=["data","prestador","funcao","situacao","entrada","alm_saida","alm_volta","saida","os","os_completa","peso","min_normais","min_he50","min_he100","confirmado","periodos_ociosos","min_brutos","min_almoco","min_ociosos","min_descontados","min_produtivos"];
 const slug=t=>String(t).normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^A-Za-z0-9]+/g,"_").replace(/^_+|_+$/g,"").toLowerCase();
+const csvCell=v=>{const text=String(v);return '"'+(/^[\s\u0000-\u001f]*[=+@-]/.test(text)?"'":"")+text.replace(/"/g,'""')+'"'};
 async function exportar(fmt){
  const m=$("#mes").value,L=linhas(m);
  if(!L.length){alert("Nenhum registro neste mês.");return}
- const txt=fmt=="csv"?"\ufeff"+[CAB,...L].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(";")).join("\r\n"):JSON.stringify(L.map(r=>Object.fromEntries(CAB.map((k,i)=>[k,r[i]]))),null,1);
+ const txt=fmt=="csv"?"\ufeff"+[CAB,...L].map(r=>r.map(csvCell).join(";")).join("\r\n"):JSON.stringify(L.map(r=>Object.fromEntries(CAB.map((k,i)=>[k,r[i]]))),null,1);
  const nome="apontamento_"+slug(funcao())+"_"+dispositivo.slice(0,8)+"_"+m+"."+fmt,tipo=fmt=="csv"?"text/csv":"application/json",blob=new Blob([txt],{type:tipo});
  try{const f=new File([blob],nome,{type:tipo});if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:nome});return}}catch(e){if(e.name==="AbortError")return}
  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();a.remove();
@@ -404,6 +416,24 @@ if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol)){
  addEventListener("load",()=>{navigator.serviceWorker.register("sw.js").catch(()=>{})});
 }
 /* Eventos inline do HTML mantidos públicos; estado interno permanece no módulo. */
-Object.assign(window,{FUNCOES,setFuncao,trocarFuncao,abrirMes,voltarDia,mv,setD,setT,agora,setS,setP,copiarOntem,rm,desfazerRm,conf,reabrir,addSv,dg,okOS,repetir,setMes,abrirDia,exportar,instalar,addIdle,setIdle,rmIdle,confirmarSalvar,voltarCorrigir,cancelarRevisao,cancelarEdicao});
+const actions={autorizarAparelho,removerAutorizacao,setFuncao,trocarFuncao,abrirMes,voltarDia,mv,setD,setT,agora,setS,setP,copiarOntem,rm,desfazerRm,conf,reabrir,addSv,dg,okOS,repetir,setMes,abrirDia,exportar,instalar,addIdle,setIdle,rmIdle,confirmarSalvar,voltarCorrigir,cancelarRevisao,cancelarEdicao};
+Object.assign(window,actions);
+/* Declarative event dispatcher: finite grammar, no eval/Function or inline handlers. */
+function dispatchAction(expression,element){
+ const match=/^([A-Za-z]+)\((.*)\)$/.exec(expression||'');if(!match||!Object.hasOwn(actions,match[1]))return;
+ const args=[];
+ if(match[2])for(const raw of match[2].split(',')){
+  const arg=raw.trim();
+  if(arg==='this.value')args.push(element.value);
+  else if(/^-?\d+$/.test(arg))args.push(Number(arg));
+  else if(/^'[A-Za-z0-9_-]*'$/.test(arg))args.push(arg.slice(1,-1));
+  else if(/^FUNCOES\[\d+\]$/.test(arg))args.push(FUNCOES[Number(arg.match(/\d+/)[0])]);
+  else return;
+ }
+ return actions[match[1]](...args);
+}
+for(const event of ['click','change'])document.addEventListener?.(event,e=>{
+ const element=e.target.closest('[data-'+event+']');if(element&&!element.disabled)dispatchAction(element.getAttribute('data-'+event),element);
+});
 R();enviar();
 </script></body></html>
