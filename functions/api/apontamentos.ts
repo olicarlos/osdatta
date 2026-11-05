@@ -1,5 +1,5 @@
-import {dataValida,validateDay,canonicalDay,aprovado} from '../../public/domain.js';
-import type {Dia} from '../../public/domain.js';
+import {dataValida,validateDay,canonicalDay,aprovado} from './domain.js';
+import type {Dia} from './domain.js';
 
 interface D1Result<T> {
   results: T[];
