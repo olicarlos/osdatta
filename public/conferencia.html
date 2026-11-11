@@ -60,7 +60,8 @@ details{margin-top:10px}summary{font-weight:700;color:var(--t);padding:8px 0;cur
   <div id="aviso" style="display:none"></div>
 </main>
 
-<script>
+<script type="module">
+import {calcDay,canonicalDay,validateDay} from './domain.js';
 /* ===== Mesma lógica de horas do app (public/index.html) ===== */
 const FERIADOS=["2026-01-01","2026-04-03","2026-04-21","2026-05-01","2026-06-04","2026-07-27","2026-09-07","2026-10-12","2026-11-02","2026-11-15","2026-11-20","2026-12-25"];
 const JORNADA=528; /* 8h48 por dia útil */
@@ -73,10 +74,7 @@ const DS=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 const especial=dt=>{const d=new Date(dt+"T12:00").getDay();return d==0||d==6||FERIADOS.includes(dt)};
 
 function calc(d,dt){
- const z={n:0,h50:0,h100:0,tot:0};if(!d||d.sit!=="T")return z;
- const e=mins(d.e),s=mins(d.s);if(e==null||s==null||s<=e)return z;
- let t=s-e;const a=mins(d.as),v=mins(d.av);if(a!=null&&v!=null&&v>a)t-=v-a;
- return especial(dt)?{n:0,h50:0,h100:t,tot:t}:{n:Math.min(t,JORNADA),h50:Math.max(0,t-JORNADA),h100:0,tot:t};
+ return calcDay(canonicalDay(d),dt);
 }
 
 /* ===== Autenticação (senha só no sessionStorage e no header, nunca na URL) ===== */
@@ -145,7 +143,7 @@ function diasUteisAteHoje(mes){
 }
 function situacao(d){
  if(!d||typeof d!=="object")return "—";
- return d.sit==="T"?"Trabalhado":d.sit==="A"?"Atestado":d.sit==="F"?"Folga/Falta":"—";
+ return d.sit==="O"?"Dia ocioso":d.sit==="T"?"Trabalhado":d.sit==="A"?"Atestado":d.sit==="F"?"Folga/Falta":"—";
 }
 
 /* ===== Renderização ===== */
@@ -173,7 +171,8 @@ function render(dados,mes){
   const setDias=new Set(regs.map(r=>String(r.data)));
   let confirmados=0;const t={n:0,h50:0,h100:0,tot:0};
   const porDia=regs.map(r=>{
-   const d=r.dia&&typeof r.dia==="object"?r.dia:{};
+   const raw=r.dia&&typeof r.dia==="object"?r.dia:{};
+   const d=canonicalDay({...raw,...(Array.isArray(r.periodos_ociosos)?{periodos_ociosos:r.periodos_ociosos}:{})});
    const c=calc(d,String(r.data));
    t.n+=c.n;t.h50+=c.h50;t.h100+=c.h100;t.tot+=c.tot;
    if(d.ok===true)confirmados++;
@@ -205,7 +204,7 @@ function render(dados,mes){
       const diaNum=x.data.slice(8,10)+"/"+x.data.slice(5,7);
       const sem=x.data+"T12:00";
       const dow=DS[new Date(sem).getDay()];
-      return `<div class="reg"><span>${diaNum} ${dow} · ${situacao(x.d)}${x.ok?" ✔":""}</span><span><b>${hm(x.c.tot)}</b>${x.c.h100?` · HE100 ${hm(x.c.h100)}`:""}${x.c.h50?` · HE50 ${hm(x.c.h50)}`:""}</span></div>`;
+      return `<div class="card"><div class="reg"><span>${diaNum} ${dow} · ${situacao(x.d)}${x.ok?" ✔":""}</span><span><b>${hm(x.c.tot)}</b>${x.c.h100?` · HE100 ${hm(x.c.h100)}`:""}${x.c.h50?` · HE50 ${hm(x.c.h50)}`:""}</span></div><p class="sub">Bruto ${x.c.bruto} min · almoço ${x.c.almoco} min · ocioso ${x.c.ocioso} min · descontado ${x.c.descontado} min · produtivo ${x.c.tot} min</p>${(x.d.periodos_ociosos||[]).map(p=>`<p class="sub">Ocioso: ${esc(p.inicio)} – ${esc(p.fim)}</p>`).join('')}${validateDay(x.d).map(e=>`<p class="w e">Registro inválido: ${esc(e)} Totais zerados; revisar origem.</p>`).join('')}</div>`;
     }).join("")}
    </details>
   </div>`;

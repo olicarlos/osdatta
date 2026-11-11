@@ -1,0 +1,253 @@
+{
+  "nodes": [
+    {
+      "id": "file::index",
+      "label": "index.ts",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\db\\index.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\db\\index.ts:1"
+    },
+    {
+      "id": "file::schema",
+      "label": "schema.ts",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\db\\schema.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\db\\schema.ts:1"
+    },
+    {
+      "id": "file::drizzle_config",
+      "label": "drizzle.config.ts",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\drizzle.config.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\drizzle.config.ts:1"
+    },
+    {
+      "id": "file::apontamentos",
+      "label": "apontamentos.ts",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\netlify\\functions\\apontamentos.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\netlify\\functions\\apontamentos.ts:1"
+    },
+    {
+      "id": "apontamentos::istexto",
+      "label": "isTexto",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\netlify\\functions\\apontamentos.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\netlify\\functions\\apontamentos.ts:8"
+    },
+    {
+      "id": "apontamentos::isdata",
+      "label": "isData",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\netlify\\functions\\apontamentos.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\netlify\\functions\\apontamentos.ts:9"
+    },
+    {
+      "id": "apontamentos::valido",
+      "label": "valido",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\netlify\\functions\\apontamentos.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\netlify\\functions\\apontamentos.ts:11"
+    },
+    {
+      "id": "apontamentos::json",
+      "label": "json",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts:46"
+    },
+    {
+      "id": "apontamentos::onrequest",
+      "label": "onRequest",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts:51"
+    },
+    {
+      "id": "apontamentos::adminkey",
+      "label": "adminKey",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\netlify\\functions\\apontamentos.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\netlify\\functions\\apontamentos.ts:16"
+    },
+    {
+      "id": "file::sw",
+      "label": "sw.js",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\public\\sw.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\public\\sw.js:1"
+    },
+    {
+      "id": "file::app_logic_test",
+      "label": "app_logic.test.js",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\app_logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\app_logic.test.js:1"
+    },
+    {
+      "id": "app_logic.test::mins",
+      "label": "mins",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\app_logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\app_logic.test.js:4"
+    },
+    {
+      "id": "app_logic_test::validaperiodosociosos",
+      "label": "validaPeriodosOciosos",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\app_logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\app_logic.test.js:6"
+    },
+    {
+      "id": "file::logic_test",
+      "label": "logic.test.js",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js:1"
+    },
+    {
+      "id": "logic.test::mins",
+      "label": "mins",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js:6"
+    },
+    {
+      "id": "logic.test::especial",
+      "label": "especial",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js:7"
+    },
+    {
+      "id": "logic_test::calc",
+      "label": "calc",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js:9"
+    },
+    {
+      "id": "logic_test::aloc",
+      "label": "aloc",
+      "fileType": "code",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js:47"
+    }
+  ],
+  "edges": [
+    {
+      "source": "file::apontamentos",
+      "target": "apontamentos::istexto",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts:38",
+      "weight": 1
+    },
+    {
+      "source": "file::apontamentos",
+      "target": "apontamentos::isdata",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts:39",
+      "weight": 1
+    },
+    {
+      "source": "file::apontamentos",
+      "target": "apontamentos::valido",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts:41",
+      "weight": 1
+    },
+    {
+      "source": "file::apontamentos",
+      "target": "apontamentos::json",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts:46",
+      "weight": 1
+    },
+    {
+      "source": "file::apontamentos",
+      "target": "apontamentos::onrequest",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\functions\\api\\apontamentos.ts:51",
+      "weight": 1
+    },
+    {
+      "source": "file::apontamentos",
+      "target": "apontamentos::adminkey",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\netlify\\functions\\apontamentos.ts",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\netlify\\functions\\apontamentos.ts:16",
+      "weight": 1
+    },
+    {
+      "source": "file::app_logic_test",
+      "target": "app_logic.test::mins",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\app_logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\app_logic.test.js:4",
+      "weight": 1
+    },
+    {
+      "source": "file::app_logic_test",
+      "target": "app_logic_test::validaperiodosociosos",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\app_logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\app_logic.test.js:6",
+      "weight": 1
+    },
+    {
+      "source": "file::logic_test",
+      "target": "logic.test::mins",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js:6",
+      "weight": 1
+    },
+    {
+      "source": "file::logic_test",
+      "target": "logic.test::especial",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js:7",
+      "weight": 1
+    },
+    {
+      "source": "file::logic_test",
+      "target": "logic_test::calc",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js:9",
+      "weight": 1
+    },
+    {
+      "source": "file::logic_test",
+      "target": "logic_test::aloc",
+      "relation": "contains",
+      "confidence": "EXTRACTED",
+      "sourceFile": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js",
+      "sourceLocation": "C:\\Users\\42297\\AppData\\Local\\hermes\\profiles\\agency-orchestrator\\cache\\scratch\\osdatta-revision\\tests\\logic.test.js:47",
+      "weight": 1
+    }
+  ],
+  "metadata": {
+    "files": 13,
+    "nodes": 19,
+    "edges": 12,
+    "builtAt": "2026-11-04T18:27:03.219Z"
+  }
+}

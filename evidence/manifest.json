@@ -1,0 +1,163 @@
+{
+  "branch": "revisao/ociosidade-multiplos-periodos",
+  "base": "f165587dd819ff616a712817ee0ebd78e9109e1b",
+  "files": [
+    {
+      "path": "README-REVISAO.md",
+      "bytes": 11388,
+      "sha256": "e5fad77c17147dc7f4d197e16e59f07abc16840d3b2b8a3179463b685d94fa7f"
+    },
+    {
+      "path": "evidence/git-diff.patch",
+      "bytes": 28831,
+      "sha256": "2cb899a07b095f12b54df137df403bf29ad72b34ddc823da44436c4b6cf66eb1"
+    },
+    {
+      "path": "evidence/git-status.txt",
+      "bytes": 324,
+      "sha256": "88c9c2e3cbdfedf59ac24b78d9eb35b05a9ff07d46639abc68c9b46bddfb6c65"
+    },
+    {
+      "path": "evidence/revisao-mobile.png",
+      "bytes": 34074,
+      "sha256": "1fa96e2278a5e96872fe0d4ed1801b925c8366fac10eba3c65ea7bf6f4160694"
+    },
+    {
+      "path": "evidence/syntax-typescript.log",
+      "bytes": 525,
+      "sha256": "7cc783b16ae717107ebe437d33b7286af43ad590f61d6f1b1d0ecfefdceea69d"
+    },
+    {
+      "path": "evidence/tests.log",
+      "bytes": 3588,
+      "sha256": "8f17b76f96ef3852ab6699ff6b997a8f2491e42ecde648386ca53c7705a0cc15"
+    },
+    {
+      "path": "functions/api/apontamentos.ts",
+      "bytes": 5820,
+      "sha256": "c20205cd18233dacd46c89748451ac59d992b03f4bdb30b3a301d5cf0d211b68"
+    },
+    {
+      "path": "migrations/0002_periodos_ociosos.sql",
+      "bytes": 162,
+      "sha256": "08c560c6631b75fcb62dfb82ebc0c9f6155f7260bbcabb89d115406947bcfdcc"
+    },
+    {
+      "path": "package.json",
+      "bytes": 463,
+      "sha256": "d56045301d7f45e5b37dbd4b46e02a5741fe466edbed3a6a243df96d4ba0c96c"
+    },
+    {
+      "path": "public/conferencia.html",
+      "bytes": 11605,
+      "sha256": "518778ed79dd74eef5bc362097f00a496d7e05515ad353327a5a324f1d425466"
+    },
+    {
+      "path": "public/domain.d.ts",
+      "bytes": 940,
+      "sha256": "04d6100d0fdf757455b88ef5cde1931a1ca4a6080056f69e20f90fc206ca8a56"
+    },
+    {
+      "path": "public/domain.js",
+      "bytes": 4301,
+      "sha256": "aac180af9f5e72682742940f3946cec4db533db46acba9eb662094c701207de8"
+    },
+    {
+      "path": "public/index.html",
+      "bytes": 27652,
+      "sha256": "6cfb7bc5a65c3534e026e16a000bc65cd1ef5bd76979be72eaab2bf4432a919a"
+    },
+    {
+      "path": "public/sw.js",
+      "bytes": 1324,
+      "sha256": "dd287d5e873de96d4e4b93ef4e4b633e0530b63ecd56f6010acba44f80195657"
+    },
+    {
+      "path": "public/workflow.js",
+      "bytes": 2959,
+      "sha256": "f76dfae5a712b50a24f886230d01e3bc3c687fdecea3ad3e4cf3105cba652481"
+    },
+    {
+      "path": "tests/api.test.js",
+      "bytes": 1278,
+      "sha256": "9cad0073aeabf9be0c519afd7bdf337c0dbe18c756ed24b5a4d1c5226088d450"
+    },
+    {
+      "path": "tests/app-harness.js",
+      "bytes": 1341,
+      "sha256": "5d4a56c462c0ba63a9743ffe172bce82528ca37208232ae9c51bb47c03d3bdaa"
+    },
+    {
+      "path": "tests/app_logic.test.js",
+      "bytes": 2003,
+      "sha256": "27787237aabb4624796c11d114dee897f1a426f6f8d6332e84030cbbeb727635"
+    },
+    {
+      "path": "tests/check-syntax.js",
+      "bytes": 1210,
+      "sha256": "624bd391d806b8a051733ceb1f844e18cae90e7ea10479c8b7e405c6b697913b"
+    },
+    {
+      "path": "tests/d1.js",
+      "bytes": 907,
+      "sha256": "69f2a63d5a3d4f1a15913c9ec936770fad305a50e4ba5be78a1e405a68004971"
+    },
+    {
+      "path": "tests/domain.test.js",
+      "bytes": 1344,
+      "sha256": "394e14c562680fb6baaaf5e0622a5284d19d46123daa9c89332d40356989f0fe"
+    },
+    {
+      "path": "tests/gestor.test.js",
+      "bytes": 1304,
+      "sha256": "a3aab21b60995f693f3f2f330c8388f3c20da84f551681eb6c217eab93fcaf3d"
+    },
+    {
+      "path": "tests/logic.test.js",
+      "bytes": 1462,
+      "sha256": "515f5648bf26cdcdddc06f8bd1be492070793bb1dd0da7a992d90de5f56b347b"
+    },
+    {
+      "path": "tests/migration.test.js",
+      "bytes": 1188,
+      "sha256": "a25d9339ecbe1c9ab052a2c1e0b94820d0f3105ed0141849fcc8c32c61c6b8e4"
+    },
+    {
+      "path": "tests/operations.test.js",
+      "bytes": 3907,
+      "sha256": "17e0a61da57c3cef4eae3162cabc265dd3cb03f3ed944e1fd607be560d9bb398"
+    },
+    {
+      "path": "tests/preview-server.js",
+      "bytes": 1735,
+      "sha256": "5ee07b46879306abb845e492842e0b3e2dc8b41644ec1961cb639655f3ac04be"
+    },
+    {
+      "path": "tests/regression.test.js",
+      "bytes": 5118,
+      "sha256": "cfbd50136bfd6bb8ff488e42010cab81718b8f91491d0cb231d17ef2722c01a7"
+    },
+    {
+      "path": "tests/sync.test.js",
+      "bytes": 3120,
+      "sha256": "b46197ac3b1b800fe9154da266a87c00a93d3ad610b5020d9a05ebebd5af8082"
+    },
+    {
+      "path": "tests/ui.test.js",
+      "bytes": 1379,
+      "sha256": "75c6aa92310e3cae6e7ef4f4658ff2dab6098fca07090525d09f2f4e5c220f72"
+    },
+    {
+      "path": "tests/workflow.test.js",
+      "bytes": 1681,
+      "sha256": "42ad8814f8e1bc92d9588498a48f82dd37510882828fdb0c194cd6b5736d1742"
+    },
+    {
+      "path": "wrangler.toml",
+      "bytes": 435,
+      "sha256": "d83e3ee3344561e71073cf89dd6fd5ffbbdb1d8f5e81bf561f9224667dbfdb5d"
+    }
+  ],
+  "file_count": 31,
+  "scope": "overlay local; sem node_modules, graphify-out, push ou deploy; migrações remotas pelo orquestrador conforme nota Kanban"
+}

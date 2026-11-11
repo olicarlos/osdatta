@@ -1,0 +1,10 @@
+npm notice run check
+npm notice run node tests/check-syntax.js
+Sintaxe inline real: public/conferencia.html
+node --check --input-type=module: exit 0
+node --check public/domain.js: exit 0
+Sintaxe inline real: public/index.html
+node --check --input-type=module: exit 0
+node --check public/sw.js: exit 0
+node --check public/workflow.js: exit 0
+node node_modules/typescript/bin/tsc --noEmit --strict --target es2022 --module es2022 --moduleResolution bundler --skipLibCheck --lib es2022,dom functions/api/apontamentos.ts: exit 0
