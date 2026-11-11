@@ -1,5 +1,5 @@
 /* Service worker: cache dos arquivos do app para funcionar offline */
-const CACHE = "apontamento-preview-ociosidade-v5";
+const CACHE = "apontamento-os-cadastro-v7";
 const ARQS = [
   "./",
   "./index.html",
